@@ -11,6 +11,7 @@ import (
 	"github.com/aziemp66/freya-be/common/password"
 	UserDomain "github.com/aziemp66/freya-be/internal/domain/user"
 	UserRepository "github.com/aziemp66/freya-be/internal/repository/user"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"gopkg.in/gomail.v2"
 )
 
@@ -122,6 +123,55 @@ func (u *UserUsecaseImplementation) ResetPassword(ctx context.Context, token, ol
 	}
 
 	err = u.userRepository.UpdatePassword(ctx, token, newPassword)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (u *UserUsecaseImplementation) UpdatePassword(ctx context.Context, id, oldPassword, newPassword string) (err error) {
+	userData, err := u.userRepository.FindByID(ctx, id)
+
+	if err != nil {
+		return err
+	}
+
+	err = u.passwordManager.CheckPasswordHash(oldPassword, userData.Password)
+
+	if err != nil {
+		return err
+	}
+
+	newPassword, err = u.passwordManager.HashPassword(newPassword)
+
+	if err != nil {
+		return err
+	}
+
+	err = u.userRepository.UpdatePassword(ctx, id, newPassword)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (u *UserUsecaseImplementation) Update(ctx context.Context, user httpCommon.UpdateUser) (err error) {
+	objId, err := primitive.ObjectIDFromHex(user.ID)
+
+	if err != nil {
+		return err
+	}
+
+	err = u.userRepository.Update(ctx, UserDomain.User{
+		ID:        objId,
+		FirstName: user.FirstName,
+		LastName:  user.LastName,
+		BirthDay:  user.BirthDay,
+	})
 
 	if err != nil {
 		return err

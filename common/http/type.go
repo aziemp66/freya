@@ -40,9 +40,10 @@ type (
 	}
 
 	UpdateUser struct {
-		FirstName string `json:"first_name" binding:"required"`
-		LastName  string `json:"last_name" binding:"required"`
-		BirthDay  string `json:"birthday" binding:"required"`
+		ID        string    `json:"id" binding:"required"`
+		FirstName string    `json:"first_name" binding:"required"`
+		LastName  string    `json:"last_name" binding:"required"`
+		BirthDay  time.Time `json:"birthday" binding:"required"`
 	}
 
 	UpdatePassword struct {
