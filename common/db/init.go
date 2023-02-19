@@ -1,26 +1,27 @@
 package db
 
 import (
-	"database/sql"
-	"fmt"
-	"time"
+	"context"
 
-	_ "github.com/go-sql-driver/mysql"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-func NewDB(connectionString string) *sql.DB {
+var ctx = context.Background()
 
-	db, err := sql.Open("mysql", connectionString)
+func NewDB(connectionString string, databaseName string) (*mongo.Database, error) {
+	clientOptions := options.Client()
+	clientOptions.ApplyURI(connectionString)
+	client, err := mongo.NewClient(clientOptions)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 
-	db.SetMaxIdleConns(10)
-	db.SetMaxOpenConns(20)
-	db.SetConnMaxIdleTime(60 * time.Minute)
-	db.SetConnMaxLifetime(10 * time.Minute)
+	err = client.Connect(ctx)
 
-	fmt.Println("Database connected")
+	if err != nil {
+		return nil, err
+	}
 
-	return db
+	return client.Database(databaseName), nil
 }
