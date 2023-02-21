@@ -1,17 +1,26 @@
 package db
 
 import (
-	"context"
+	"database/sql"
+	"fmt"
+	"time"
 
-	"cloud.google.com/go/firestore"
+	_ "github.com/go-sql-driver/mysql"
 )
 
-func NewClient(ctx context.Context, projectId string) *firestore.Client {
-	client, err := firestore.NewClient(ctx, projectId)
+func NewDB(connectionString string) *sql.DB {
 
+	db, err := sql.Open("mysql", connectionString)
 	if err != nil {
 		panic(err)
 	}
 
-	return client
+	db.SetMaxIdleConns(10)
+	db.SetMaxOpenConns(20)
+	db.SetConnMaxIdleTime(60 * time.Minute)
+	db.SetConnMaxLifetime(10 * time.Minute)
+
+	fmt.Println("Database connected")
+
+	return db
 }
