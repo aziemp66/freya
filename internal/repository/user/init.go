@@ -26,16 +26,6 @@ func (r *UserRepositoryImplementation) Insert(ctx context.Context, user userDoma
 	return nil
 }
 
-func (r *UserRepositoryImplementation) FindByID(ctx context.Context, id string) (user userDomain.User, err error) {
-	err = r.db.Collection("users").FindOne(ctx, bson.M{"_id": id}).Decode(&user)
-
-	if err != nil {
-		return user, err
-	}
-
-	return user, nil
-}
-
 func (r *UserRepositoryImplementation) FindByEmail(ctx context.Context, email string) (user userDomain.User, err error) {
 	err = r.db.Collection("users").FindOne(ctx, bson.M{"email": email}).Decode(&user)
 
