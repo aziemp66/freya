@@ -47,7 +47,7 @@ func (r *UserRepositoryImplementation) FindByEmail(ctx context.Context, email st
 }
 
 func (r *UserRepositoryImplementation) Update(ctx context.Context, user userDomain.User) (err error) {
-	_, err = r.db.Collection("users").ReplaceOne(ctx, bson.M{"_id": user.ID}, user)
+	_, err = r.db.Collection("users").UpdateOne(ctx, bson.M{"_id": user.ID}, user)
 
 	if err != nil {
 		return err
