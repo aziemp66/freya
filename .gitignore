@@ -4,3 +4,6 @@
 
 #environtment
 .env
+
+#build files
+build/*

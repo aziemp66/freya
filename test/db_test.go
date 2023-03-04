@@ -5,7 +5,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/aziemp66/freya-be/internal/domain"
 	"github.com/aziemp66/freya-be/internal/domain/user"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -50,10 +49,8 @@ func TestDBInsert(t *testing.T) {
 		Password:        "blaablablba",
 		Role:            "user",
 		IsEmailVerified: false,
-		Timestamp: domain.Timestamp{
-			CreatedAt: time.Now(),
-			UpdatedAt: time.Now(),
-		},
+		CreatedAt:       time.Now(),
+		UpdatedAt:       time.Now(),
 	})
 }
 
