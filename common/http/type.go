@@ -15,6 +15,17 @@ type (
 		Errors  map[string]string `json:"errors"`
 	}
 
+	User struct {
+		Id        string    `json:"id"`
+		FirstName string    `json:"first_name"`
+		LastName  string    `json:"last_name"`
+		Email     string    `json:"email"`
+		BirthDay  time.Time `json:"birthday"`
+		Role      string    `json:"role"`
+		CreatedAt time.Time `json:"created_at"`
+		UpdatedAt time.Time `json:"updated_at"`
+	}
+
 	Login struct {
 		Email    string `json:"email" binding:"required,email"`
 		Password string `json:"password" binding:"required,gte=8,lte=104"`
