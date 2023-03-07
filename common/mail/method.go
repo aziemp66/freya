@@ -11,13 +11,20 @@ var templates embed.FS
 
 var parsedTemplates = template.Must(template.ParseFS(templates, "templates/*.html"))
 
-func ParseTemplates[T EmailVerification | PasswordReset](data T, templateTitle string) (string, error) {
-	buff := new(bytes.Buffer)
-
-	err := parsedTemplates.ExecuteTemplate(buff, templateTitle, data)
+func RenderEmailVerificationTemplate(data EmailVerification) (string, error) {
+	var buf bytes.Buffer
+	err := parsedTemplates.ExecuteTemplate(&buf, "email_verification.html", data)
 	if err != nil {
 		return "", err
 	}
+	return buf.String(), nil
+}
 
-	return buff.String(), nil
+func RenderPasswordResetTemplate(data PasswordReset) (string, error) {
+	var buf bytes.Buffer
+	err := parsedTemplates.ExecuteTemplate(&buf, "password_reset.html", data)
+	if err != nil {
+		return "", err
+	}
+	return buf.String(), nil
 }
