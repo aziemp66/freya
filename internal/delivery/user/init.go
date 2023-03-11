@@ -61,3 +61,54 @@ func (u *UserDelivery) Register(c *gin.Context) {
 		Message: "Register success",
 	})
 }
+
+func (u *UserDelivery) Update(c *gin.Context) {
+	var updateUserRequest httpCommon.UpdateUser
+
+	if err := c.ShouldBindJSON(&updateUserRequest); err != nil {
+		return
+	}
+
+	userId := c.GetString("user_id")
+
+	err := u.UserUseCase.Update(c, userId, updateUserRequest)
+
+	if err != nil {
+		c.Error(err)
+		return
+	}
+
+	c.JSON(200, httpCommon.Response{
+		Code:    200,
+		Message: "Update success",
+	})
+}
+
+func (u *UserDelivery) UpdatePassword(c *gin.Context) {
+	var updatePasswordRequest httpCommon.UpdatePassword
+
+	if err := c.ShouldBindJSON(&updatePasswordRequest); err != nil {
+		return
+	}
+
+	userId := c.GetString("user_id")
+
+	user, err := u.UserUseCase.GetById(c, userId)
+
+	if err != nil {
+		c.Error(err)
+		return
+	}
+
+	err = u.UserUseCase.UpdatePassword(c, user.Id, updatePasswordRequest.OldPassword, updatePasswordRequest.NewPassword)
+
+	if err != nil {
+		c.Error(err)
+		return
+	}
+
+	c.JSON(200, httpCommon.Response{
+		Code:    200,
+		Message: "Update password success",
+	})
+}

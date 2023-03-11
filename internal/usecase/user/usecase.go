@@ -13,7 +13,7 @@ type Usecase interface {
 	ResetPassword(ctx context.Context, token, oldPasswordHash, newPassword string) (err error)
 	UpdatePassword(ctx context.Context, id, oldPassword, newPassword string) (err error)
 	GetById(ctx context.Context, id string) (user httpCommon.User, err error)
-	Update(ctx context.Context, user httpCommon.UpdateUser) (err error)
+	Update(ctx context.Context, id string, user httpCommon.UpdateUser) (err error)
 	sendMailActivation(ctx context.Context, email string) (err error)
 	Activate(ctx context.Context, id string) (err error)
 }

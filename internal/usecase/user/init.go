@@ -131,20 +131,20 @@ func (u *UserUsecaseImplementation) ResetPassword(ctx context.Context, token, ol
 	return nil
 }
 
-func (u *UserUsecaseImplementation) UpdatePassword(ctx context.Context, id, oldPassword, newPassword string) (err error) {
+func (u *UserUsecaseImplementation) UpdatePassword(ctx context.Context, id string, userUpdatePassword httpCommon.UpdatePassword) (err error) {
 	userData, err := u.userRepository.FindByID(ctx, id)
 
 	if err != nil {
 		return err
 	}
 
-	err = u.passwordManager.CheckPasswordHash(oldPassword, userData.Password)
+	err = u.passwordManager.CheckPasswordHash(userUpdatePassword.OldPassword, userData.Password)
 
 	if err != nil {
 		return err
 	}
 
-	newPassword, err = u.passwordManager.HashPassword(newPassword)
+	newPassword, err := u.passwordManager.HashPassword(userUpdatePassword.NewPassword)
 
 	if err != nil {
 		return err
@@ -159,8 +159,8 @@ func (u *UserUsecaseImplementation) UpdatePassword(ctx context.Context, id, oldP
 	return nil
 }
 
-func (u *UserUsecaseImplementation) Update(ctx context.Context, user httpCommon.UpdateUser) (err error) {
-	objId, err := primitive.ObjectIDFromHex(user.ID)
+func (u *UserUsecaseImplementation) Update(ctx context.Context, id string, user httpCommon.UpdateUser) (err error) {
+	objId, err := primitive.ObjectIDFromHex(id)
 
 	if err != nil {
 		return err

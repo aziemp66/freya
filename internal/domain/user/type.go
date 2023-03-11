@@ -8,16 +8,16 @@ import (
 
 type (
 	User struct {
-		ID              primitive.ObjectID `bson:"_id"`
-		FirstName       string             `bson:"first_name"`
-		LastName        string             `bson:"last_name"`
-		Email           string             `bson:"email"`
-		Password        string             `bson:"password"`
-		BirthDay        time.Time          `bson:"birthday"`
+		ID              primitive.ObjectID `bson:"_id,omitempty"`
+		FirstName       string             `bson:"first_name,omitempty"`
+		LastName        string             `bson:"last_name,omitempty"`
+		Email           string             `bson:"email,omitempty"`
+		Password        string             `bson:"password,omitempty"`
+		BirthDay        time.Time          `bson:"birthday,omitempty"`
 		IsEmailVerified bool               `bson:"is_email_verified"`
-		Role            role               `bson:"role"`
-		CreatedAt       time.Time          `bson:"created_at"`
-		UpdatedAt       time.Time          `bson:"updated_at"`
+		Role            role               `bson:"role,omitempty"`
+		CreatedAt       time.Time          `bson:"created_at,omitempty"`
+		UpdatedAt       time.Time          `bson:"updated_at,omitempty"`
 	}
 
 	role string
