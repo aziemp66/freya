@@ -17,6 +17,10 @@ func NewUserDelivery(router *gin.RouterGroup, userUseCase userUserCase.Usecase) 
 
 	router.POST("/login", UserDelivery.Login)
 	router.POST("/register", UserDelivery.Register)
+	router.POST("/forgot-password", UserDelivery.ForgotPassword)
+	router.POST("/reset-password", UserDelivery.ResetPassword)
+	router.PUT("/update", UserDelivery.Update)
+	router.PUT("/update-password", UserDelivery.UpdatePassword)
 
 	return UserDelivery
 }
@@ -140,8 +144,8 @@ func (u *UserDelivery) ResetPassword(c *gin.Context) {
 		return
 	}
 
-	userId := c.Param("id")
-	userToken := c.Param("token")
+	userId := c.Query("id")
+	userToken := c.Query("token")
 
 	err := u.UserUseCase.ResetPassword(c, userToken, userId, resetPasswordRequest.NewPassword)
 
@@ -153,5 +157,22 @@ func (u *UserDelivery) ResetPassword(c *gin.Context) {
 	c.JSON(200, httpCommon.Response{
 		Code:    200,
 		Message: "Reset password success",
+	})
+}
+
+func (u *UserDelivery) GetById(c *gin.Context) {
+	userId := c.GetString("user_id")
+
+	user, err := u.UserUseCase.GetById(c, userId)
+
+	if err != nil {
+		c.Error(err)
+		return
+	}
+
+	c.JSON(200, httpCommon.Response{
+		Code:    200,
+		Message: "Get user success",
+		Value:   gin.H{"user": user},
 	})
 }
