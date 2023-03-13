@@ -20,14 +20,14 @@ func JWTAuth(j *jwt.JWTManager) gin.HandlerFunc {
 			return
 		}
 		tokenString := authHeader[BEARER:]
-		email, name, role, err := j.VerifyAuthToken(tokenString)
+		id, name, role, err := j.VerifyAuthToken(tokenString)
 		if err != nil {
 			c.Error(err)
 			c.Abort()
 			return
 		}
 
-		c.Set("user_email", email)
+		c.Set("user_id", id)
 		c.Set("user_name", name)
 		c.Set("user_role", role)
 		c.Next()

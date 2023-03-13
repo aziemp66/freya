@@ -16,11 +16,11 @@ func NewJWTManager(accessTokenKey string, adminTokenKey string) *JWTManager {
 	return &JWTManager{AccessTokenKey: []byte(accessTokenKey), AdminTokenKey: []byte(adminTokenKey)}
 }
 
-func (j JWTManager) GenerateAuthToken(email string, name string, role string, duration time.Duration) (string, error) {
+func (j JWTManager) GenerateAuthToken(id string, name string, role string, duration time.Duration) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, AuthClaims{
-		Email: email,
-		Name:  name,
-		Role:  role,
+		ID:   id,
+		Name: name,
+		Role: role,
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(duration)),
 		},
@@ -35,7 +35,7 @@ func (j JWTManager) GenerateAuthToken(email string, name string, role string, du
 	return tokenString, nil
 }
 
-func (j JWTManager) VerifyAuthToken(tokenString string) (email string, name string, role string, err error) {
+func (j JWTManager) VerifyAuthToken(tokenString string) (id, name, role string, err error) {
 	claims := &AuthClaims{}
 
 	tkn, err := jwt.ParseWithClaims(tokenString, claims, func(t *jwt.Token) (interface{}, error) {
@@ -51,7 +51,7 @@ func (j JWTManager) VerifyAuthToken(tokenString string) (email string, name stri
 		return
 	}
 
-	email = claims.Email
+	id = claims.ID
 	name = claims.Name
 	role = claims.Role
 
