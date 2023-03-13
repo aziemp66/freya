@@ -2,14 +2,17 @@ package test
 
 import (
 	"context"
+	"os/user"
 	"testing"
 	"time"
 
-	"github.com/aziemp66/freya-be/internal/domain/user"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
+
+	userDomain "github.com/aziemp66/freya-be/internal/domain/user"
+	userRepository "github.com/aziemp66/freya-be/internal/repository/user"
 )
 
 var ctx = context.Background()
@@ -41,7 +44,7 @@ func generateDB() *mongo.Database {
 func TestDBInsert(t *testing.T) {
 	db := generateDB()
 
-	db.Collection("users").InsertOne(ctx, user.User{
+	db.Collection("users").InsertOne(ctx, userDomain.User{
 		ID:              primitive.NewObjectID(),
 		FirstName:       "Aizen",
 		LastName:        "Melza",
@@ -72,29 +75,25 @@ func TestDBRead(t *testing.T) {
 func TestDBUpdate(t *testing.T) {
 	db := generateDB()
 
-	objectid, err := primitive.ObjectIDFromHex("64029fcf32a52457d6cfb1fe")
+	userRepository := userRepository.NewUserRepositoryImplementation(db)
+
+	objectid, err := primitive.ObjectIDFromHex("6402cfe8d51715ec946fe123")
 
 	if err != nil {
 		t.Error(err)
 	}
 
-	type UpdateUser struct {
-		FirstName string `bson:"first_name"`
-		LastName  string `bson:"last_name"`
+	user := userDomain.User{
+		ID:       objectid,
+		LastName: "Melza",
 	}
 
-	user := UpdateUser{
-		FirstName: "Azie",
-		LastName:  "Melza",
-	}
-
-	result, err := db.Collection("users").UpdateByID(ctx, objectid, bson.M{"$set": user})
+	ctx := context.Background()
+	err = userRepository.Update(ctx, user)
 
 	if err != nil {
 		t.Error(err)
 	}
-
-	t.Log(result)
 }
 
 func TestDBReplace(t *testing.T) {
@@ -106,10 +105,9 @@ func TestDBReplace(t *testing.T) {
 		t.Error(err)
 	}
 
-	user := user.User{
-		ID:        objectid,
-		FirstName: "Azie",
-		LastName:  "Melza",
+	user := userDomain.User{
+		ID:       objectid,
+		LastName: "Melza",
 	}
 
 	result, err := db.Collection("users").ReplaceOne(ctx, bson.M{"_id": objectid}, user)
