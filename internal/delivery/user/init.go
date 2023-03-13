@@ -112,3 +112,46 @@ func (u *UserDelivery) UpdatePassword(c *gin.Context) {
 		Message: "Update password success",
 	})
 }
+
+func (u *UserDelivery) ForgotPassword(c *gin.Context) {
+	var forgotPasswordRequest httpCommon.ForgotPassword
+
+	if err := c.ShouldBindJSON(&forgotPasswordRequest); err != nil {
+		return
+	}
+
+	err := u.UserUseCase.ForgotPassword(c, forgotPasswordRequest.Email)
+
+	if err != nil {
+		c.Error(err)
+		return
+	}
+
+	c.JSON(200, httpCommon.Response{
+		Code:    200,
+		Message: "Forgot password success",
+	})
+}
+
+func (u *UserDelivery) ResetPassword(c *gin.Context) {
+	var resetPasswordRequest httpCommon.ResetPassword
+
+	if err := c.ShouldBindJSON(&resetPasswordRequest); err != nil {
+		return
+	}
+
+	userId := c.Param("id")
+	userToken := c.Param("token")
+
+	err := u.UserUseCase.ResetPassword(c, userToken, userId, resetPasswordRequest.NewPassword)
+
+	if err != nil {
+		c.Error(err)
+		return
+	}
+
+	c.JSON(200, httpCommon.Response{
+		Code:    200,
+		Message: "Reset password success",
+	})
+}

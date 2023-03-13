@@ -51,16 +51,12 @@ func (j JWTManager) VerifyAuthToken(tokenString string) (id, name, role string, 
 		return
 	}
 
-	id = claims.ID
-	name = claims.Name
-	role = claims.Role
-
-	return
+	return claims.ID, claims.Name, claims.Role, nil
 }
 
-func (j JWTManager) GenerateUserToken(email string, password string, duration time.Duration) (string, error) {
+func (j JWTManager) GenerateUserToken(id string, password string, duration time.Duration) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, UserClaims{
-		Email: email,
+		ID: id,
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(duration)),
 		},
@@ -79,7 +75,7 @@ func (j JWTManager) GenerateUserToken(email string, password string, duration ti
 	return tokenString, nil
 }
 
-func (j JWTManager) VerifyUserToken(tokenString string, password string) error {
+func (j JWTManager) VerifyUserToken(tokenString string, password string) (err error) {
 	claims := &UserClaims{}
 
 	stringAccessToken := string(j.AccessTokenKey)

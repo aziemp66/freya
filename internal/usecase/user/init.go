@@ -109,20 +109,26 @@ func (u *UserUsecaseImplementation) ForgotPassword(ctx context.Context, email st
 	return nil
 }
 
-func (u *UserUsecaseImplementation) ResetPassword(ctx context.Context, token, oldPasswordHash, newPassword string) (err error) {
-	err = u.jwtManager.VerifyUserToken(token, oldPasswordHash)
-
-	if err != nil {
-		return err
-	}
-
+func (u *UserUsecaseImplementation) ResetPassword(ctx context.Context, id, token, newPassword string) (err error) {
 	newPassword, err = u.passwordManager.HashPassword(newPassword)
 
 	if err != nil {
 		return err
 	}
 
-	err = u.userRepository.UpdatePassword(ctx, token, newPassword)
+	user, err := u.userRepository.FindByID(ctx, id)
+
+	if err != nil {
+		return err
+	}
+
+	err = u.jwtManager.VerifyUserToken(token, user.Password)
+
+	if err != nil {
+		return err
+	}
+
+	err = u.userRepository.UpdatePassword(ctx, id, newPassword)
 
 	if err != nil {
 		return err

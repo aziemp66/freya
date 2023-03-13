@@ -49,4 +49,12 @@ type (
 		OldPassword string `json:"old_password" binding:"required,gte=8,lte=104"`
 		NewPassword string `json:"new_password" binding:"required,gte=8,lte=104"`
 	}
+
+	ForgotPassword struct {
+		Email string `json:"email" binding:"required,email"`
+	}
+
+	ResetPassword struct {
+		NewPassword string `json:"new_password" binding:"required,gte=8,lte=104"`
+	}
 )
