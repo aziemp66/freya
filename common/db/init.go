@@ -9,19 +9,19 @@ import (
 
 var ctx = context.Background()
 
-func NewDB(connectionString string, databaseName string) (*mongo.Database, error) {
+func NewDB(connectionString string, databaseName string) *mongo.Database {
 	clientOptions := options.Client()
 	clientOptions.ApplyURI(connectionString)
 	client, err := mongo.NewClient(clientOptions)
 	if err != nil {
-		return nil, err
+		panic(err)
 	}
 
 	err = client.Connect(ctx)
 
 	if err != nil {
-		return nil, err
+		panic(err)
 	}
 
-	return client.Database(databaseName), nil
+	return client.Database(databaseName)
 }

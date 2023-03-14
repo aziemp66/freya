@@ -6,10 +6,15 @@ import (
 )
 
 type config struct {
-	Port               string `env:"PORT,unset" envDefault:"5000"`
-	JwtSecretKey       string `env:"JWT_SECRET_KEY,unset"`
-	GinMode            string `env:"GIN_MODE,unset" envDefault:"debug"`
-	FirestoreProjectId string `env:"FIRESTORE_PROJECT_ID,unset"`
+	Port         int    `env:"PORT,unset" envDefault:"5000"`
+	JwtSecretKey string `env:"JWT_SECRET_KEY,unset"`
+	GinMode      string `env:"GIN_MODE,unset" envDefault:"debug"`
+	DBUrl        string `env:"DB_URL,unset"`
+	DBName       string `env:"DB_NAME,unset"`
+	MailEmail    string `env:"MAIL_EMAIL,unset"`
+	MailPassword string `env:"MAIL_PASSWORD,unset"`
+	MailHost     string `env:"MAIL_HOST,unset"`
+	MailPort     int    `env:"MAIL_PORT,unset"`
 }
 
 func LoadConfig() *config {

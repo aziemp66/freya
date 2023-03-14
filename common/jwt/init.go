@@ -12,8 +12,8 @@ type JWTManager struct {
 	AdminTokenKey  []byte
 }
 
-func NewJWTManager(accessTokenKey string, adminTokenKey string) *JWTManager {
-	return &JWTManager{AccessTokenKey: []byte(accessTokenKey), AdminTokenKey: []byte(adminTokenKey)}
+func NewJWTManager(accessTokenKey string) *JWTManager {
+	return &JWTManager{AccessTokenKey: []byte(accessTokenKey)}
 }
 
 func (j JWTManager) GenerateAuthToken(id string, name string, role string, duration time.Duration) (string, error) {

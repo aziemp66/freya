@@ -17,12 +17,12 @@ import (
 
 type UserUsecaseImplementation struct {
 	userRepository  UserRepository.Repository
-	passwordManager password.PasswordHashManager
-	jwtManager      jwt.JWTManager
+	passwordManager *password.PasswordHashManager
+	jwtManager      *jwt.JWTManager
 	mailDialer      *gomail.Dialer
 }
 
-func NewUserUsecaseImplementation(userRepository UserRepository.Repository, passwordManager password.PasswordHashManager, jwtManager jwt.JWTManager, mailDialer *gomail.Dialer) *UserUsecaseImplementation {
+func NewUserUsecaseImplementation(userRepository UserRepository.Repository, passwordManager *password.PasswordHashManager, jwtManager *jwt.JWTManager, mailDialer *gomail.Dialer) *UserUsecaseImplementation {
 	return &UserUsecaseImplementation{userRepository, passwordManager, jwtManager, mailDialer}
 }
 
@@ -43,7 +43,7 @@ func (u *UserUsecaseImplementation) Register(ctx context.Context, user httpCommo
 		return err
 	}
 
-	err = u.sendMailActivation(ctx, user.Email)
+	err = u.SendMailActivation(ctx, user.Email)
 
 	if err != nil {
 		return err
@@ -52,14 +52,14 @@ func (u *UserUsecaseImplementation) Register(ctx context.Context, user httpCommo
 	return nil
 }
 
-func (u *UserUsecaseImplementation) Login(ctx context.Context, user httpCommon.Login) (token string, err error) {
-	userData, err := u.userRepository.FindByEmail(ctx, user.Email)
+func (u *UserUsecaseImplementation) Login(ctx context.Context, email, password string) (token string, err error) {
+	userData, err := u.userRepository.FindByEmail(ctx, email)
 
 	if err != nil {
 		return "", err
 	}
 
-	err = u.passwordManager.CheckPasswordHash(user.Password, userData.Password)
+	err = u.passwordManager.CheckPasswordHash(password, userData.Password)
 
 	if err != nil {
 		return "", err
@@ -137,32 +137,54 @@ func (u *UserUsecaseImplementation) ResetPassword(ctx context.Context, id, token
 	return nil
 }
 
-func (u *UserUsecaseImplementation) UpdatePassword(ctx context.Context, id string, userUpdatePassword httpCommon.UpdatePassword) (err error) {
+func (u *UserUsecaseImplementation) UpdatePassword(ctx context.Context, id, oldPassword, newPassword string) (err error) {
 	userData, err := u.userRepository.FindByID(ctx, id)
 
 	if err != nil {
 		return err
 	}
 
-	err = u.passwordManager.CheckPasswordHash(userUpdatePassword.OldPassword, userData.Password)
+	err = u.passwordManager.CheckPasswordHash(oldPassword, userData.Password)
 
 	if err != nil {
 		return err
 	}
 
-	newPassword, err := u.passwordManager.HashPassword(userUpdatePassword.NewPassword)
+	hashedPassword, err := u.passwordManager.HashPassword(newPassword)
 
 	if err != nil {
 		return err
 	}
 
-	err = u.userRepository.UpdatePassword(ctx, id, newPassword)
+	err = u.userRepository.UpdatePassword(ctx, id, hashedPassword)
 
 	if err != nil {
 		return err
 	}
 
 	return nil
+}
+
+func (u *UserUsecaseImplementation) GetById(ctx context.Context, id string) (user httpCommon.User, err error) {
+	userData, err := u.userRepository.FindByID(ctx, id)
+
+	if err != nil {
+		return httpCommon.User{}, err
+	}
+
+	user = httpCommon.User{
+		Id:              userData.ID.Hex(),
+		FirstName:       userData.FirstName,
+		LastName:        userData.LastName,
+		Email:           userData.Email,
+		BirthDay:        userData.BirthDay,
+		Role:            string(userData.Role),
+		IsEmailVerified: userData.IsEmailVerified,
+		CreatedAt:       userData.CreatedAt,
+		UpdatedAt:       userData.UpdatedAt,
+	}
+
+	return
 }
 
 func (u *UserUsecaseImplementation) Update(ctx context.Context, id string, user httpCommon.UpdateUser) (err error) {
@@ -187,9 +209,13 @@ func (u *UserUsecaseImplementation) Update(ctx context.Context, id string, user 
 }
 
 // send mail activation
-func (u *UserUsecaseImplementation) sendMailActivation(ctx context.Context, email string) (err error) {
+func (u *UserUsecaseImplementation) SendMailActivation(ctx context.Context, email string) (err error) {
 	if err != nil {
 		panic(err)
 	}
+	return
+}
+
+func (u *UserUsecaseImplementation) Activate(ctx context.Context, id string) (err error) {
 	return
 }

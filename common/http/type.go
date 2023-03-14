@@ -16,14 +16,15 @@ type (
 	}
 
 	User struct {
-		Id        string    `json:"id"`
-		FirstName string    `json:"first_name"`
-		LastName  string    `json:"last_name"`
-		Email     string    `json:"email"`
-		BirthDay  time.Time `json:"birthday"`
-		Role      string    `json:"role"`
-		CreatedAt time.Time `json:"created_at"`
-		UpdatedAt time.Time `json:"updated_at"`
+		Id              string    `json:"id"`
+		FirstName       string    `json:"first_name"`
+		LastName        string    `json:"last_name"`
+		Email           string    `json:"email"`
+		BirthDay        time.Time `json:"birthday"`
+		Role            string    `json:"role"`
+		CreatedAt       time.Time `json:"created_at"`
+		UpdatedAt       time.Time `json:"updated_at"`
+		IsEmailVerified bool      `json:"is_email_verified"`
 	}
 
 	Login struct {
