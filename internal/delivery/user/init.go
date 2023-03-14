@@ -53,7 +53,7 @@ func (u *UserDelivery) Register(c *gin.Context) {
 		return
 	}
 
-	err := u.UserUseCase.Register(c, registerRequest)
+	err := u.UserUseCase.Register(c, registerRequest.Email, registerRequest.Password, registerRequest.FirstName, registerRequest.LastName, registerRequest.BirthDay)
 
 	if err != nil {
 		c.Error(err)

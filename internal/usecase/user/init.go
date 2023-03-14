@@ -26,16 +26,19 @@ func NewUserUsecaseImplementation(userRepository UserRepository.Repository, pass
 	return &UserUsecaseImplementation{userRepository, passwordManager, jwtManager, mailDialer}
 }
 
-func (u *UserUsecaseImplementation) Register(ctx context.Context, user httpCommon.AddUser) (err error) {
-	user.Password, err = u.passwordManager.HashPassword(user.Password)
+func (u *UserUsecaseImplementation) Register(ctx context.Context, email, password, firstName, lastName string, birthDay time.Time) (err error) {
+	hashedPassword, err := u.passwordManager.HashPassword(password)
 
 	if err != nil {
 		return err
 	}
 
 	err = u.userRepository.Insert(ctx, UserDomain.User{
-		Email:           user.Email,
-		Password:        user.Password,
+		Email:           email,
+		Password:        hashedPassword,
+		FirstName:       firstName,
+		LastName:        lastName,
+		BirthDay:        birthDay,
 		IsEmailVerified: false,
 	})
 
@@ -43,7 +46,7 @@ func (u *UserUsecaseImplementation) Register(ctx context.Context, user httpCommo
 		return err
 	}
 
-	err = u.SendMailActivation(ctx, user.Email)
+	err = u.SendMailActivation(ctx, email)
 
 	if err != nil {
 		return err

@@ -2,12 +2,13 @@ package user
 
 import (
 	"context"
+	"time"
 
 	httpCommon "github.com/aziemp66/freya-be/common/http"
 )
 
 type Usecase interface {
-	Register(ctx context.Context, user httpCommon.AddUser) (err error)
+	Register(ctx context.Context, email, password, firstName, lastName string, birthday time.Time) (err error)
 	Login(ctx context.Context, email, password string) (token string, err error)
 	ForgotPassword(ctx context.Context, email string) (err error)
 	ResetPassword(ctx context.Context, id, token, newPassword string) (err error)
