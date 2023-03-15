@@ -5,6 +5,7 @@ import (
 
 	userDomain "github.com/aziemp66/freya-be/internal/domain/user"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
@@ -27,7 +28,13 @@ func (r *UserRepositoryImplementation) Insert(ctx context.Context, user userDoma
 }
 
 func (r *UserRepositoryImplementation) FindByID(ctx context.Context, id string) (user userDomain.User, err error) {
-	err = r.db.Collection("users").FindOne(ctx, bson.M{"_id": id}).Decode(&user)
+	objId, err := primitive.ObjectIDFromHex(id)
+
+	if err != nil {
+		return user, err
+	}
+
+	err = r.db.Collection("users").FindOne(ctx, bson.M{"_id": objId}).Decode(&user)
 
 	if err != nil {
 		return user, err
@@ -57,7 +64,13 @@ func (r *UserRepositoryImplementation) Update(ctx context.Context, user userDoma
 }
 
 func (r *UserRepositoryImplementation) UpdateVerifiedEmail(ctx context.Context, id string) (err error) {
-	_, err = r.db.Collection("users").UpdateByID(ctx, id, bson.M{"$set": bson.M{"is_email_verified": true}})
+	objId, err := primitive.ObjectIDFromHex(id)
+
+	if err != nil {
+		return err
+	}
+
+	_, err = r.db.Collection("users").UpdateByID(ctx, objId, bson.M{"$set": bson.M{"is_email_verified": true}})
 
 	if err != nil {
 		return err
@@ -67,7 +80,13 @@ func (r *UserRepositoryImplementation) UpdateVerifiedEmail(ctx context.Context, 
 }
 
 func (r *UserRepositoryImplementation) UpdatePassword(ctx context.Context, id, password string) (err error) {
-	_, err = r.db.Collection("users").UpdateByID(ctx, id, bson.M{"$set": bson.M{"password": password}})
+	objId, err := primitive.ObjectIDFromHex(id)
+
+	if err != nil {
+		return err
+	}
+
+	_, err = r.db.Collection("users").UpdateByID(ctx, objId, bson.M{"$set": bson.M{"password": password}})
 
 	if err != nil {
 		return err
