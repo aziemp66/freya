@@ -58,4 +58,9 @@ type (
 	ResetPassword struct {
 		NewPassword string `json:"new_password" binding:"required,gte=8,lte=104"`
 	}
+
+	Post struct {
+		ID     string `json:"id"`
+		UserId string `json:"user_id"`
+	}
 )

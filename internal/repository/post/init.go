@@ -16,7 +16,7 @@ func NewPostRepositoryImplementation(db *mongo.Database) *PostRepositoryImplemen
 	return &PostRepositoryImplementation{db}
 }
 
-func (r *PostRepositoryImplementation) Insert(ctx context.Context, post postDomain.Post) (err error) {
+func (r *PostRepositoryImplementation) InsertPost(ctx context.Context, post postDomain.Post) (err error) {
 	_, err = r.db.Collection("posts").InsertOne(ctx, post)
 
 	if err != nil {
@@ -26,7 +26,7 @@ func (r *PostRepositoryImplementation) Insert(ctx context.Context, post postDoma
 	return nil
 }
 
-func (r *PostRepositoryImplementation) FindByID(ctx context.Context, id string) (post postDomain.Post, err error) {
+func (r *PostRepositoryImplementation) FindPostByID(ctx context.Context, id string) (post postDomain.Post, err error) {
 	objId, err := primitive.ObjectIDFromHex(id)
 
 	if err != nil {
@@ -42,7 +42,7 @@ func (r *PostRepositoryImplementation) FindByID(ctx context.Context, id string) 
 	return post, nil
 }
 
-func (r *PostRepositoryImplementation) FindAll(ctx context.Context) (posts []postDomain.Post, err error) {
+func (r *PostRepositoryImplementation) FindAllPosts(ctx context.Context) (posts []postDomain.Post, err error) {
 	cursor, err := r.db.Collection("posts").Find(ctx, postDomain.Post{})
 
 	if err != nil {
@@ -66,7 +66,7 @@ func (r *PostRepositoryImplementation) FindAll(ctx context.Context) (posts []pos
 	return posts, nil
 }
 
-func (r *PostRepositoryImplementation) Delete(ctx context.Context, id string) (err error) {
+func (r *PostRepositoryImplementation) DeletePost(ctx context.Context, id string) (err error) {
 	objId, err := primitive.ObjectIDFromHex(id)
 
 	if err != nil {
@@ -80,4 +80,44 @@ func (r *PostRepositoryImplementation) Delete(ctx context.Context, id string) (e
 	}
 
 	return nil
+}
+
+func (r *PostRepositoryImplementation) InsertComment(ctx context.Context, comment postDomain.Comment) (err error) {
+	_, err = r.db.Collection("comments").InsertOne(ctx, comment)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (r *PostRepositoryImplementation) FindAllCommentsByPostID(ctx context.Context, id string) (comments []postDomain.Comment, err error) {
+	objId, err := primitive.ObjectIDFromHex(id)
+
+	if err != nil {
+		return nil, err
+	}
+
+	cursor, err := r.db.Collection("comments").Find(ctx, postDomain.Comment{PostId: objId})
+
+	if err != nil {
+		return nil, err
+	}
+
+	defer cursor.Close(ctx)
+
+	for cursor.Next(ctx) {
+		var comment postDomain.Comment
+
+		err = cursor.Decode(&comment)
+
+		if err != nil {
+			return nil, err
+		}
+
+		comments = append(comments, comment)
+	}
+
+	return comments, nil
 }
