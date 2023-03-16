@@ -60,7 +60,28 @@ type (
 	}
 
 	Post struct {
-		ID     string `json:"id"`
-		UserId string `json:"user_id"`
+		ID       string `json:"id"`
+		Title    string `json:"title"`
+		Content  string `json:"content"`
+		AuthorID string `json:"author_id"`
+	}
+
+	AddPost struct {
+		Title    string `json:"title" binding:"required"`
+		Content  string `json:"content" binding:"required"`
+		AuthorID string `json:"author_id" binding:"required"`
+	}
+
+	Comment struct {
+		ID       string `json:"id"`
+		Content  string `json:"content"`
+		AuthorID string `json:"author_id"`
+		PostID   string `json:"post_id"`
+	}
+
+	AddComment struct {
+		Content  string `json:"content" binding:"required"`
+		AuthorID string `json:"author_id" binding:"required"`
+		PostID   string `json:"post_id" binding:"required"`
 	}
 )
