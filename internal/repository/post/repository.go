@@ -13,5 +13,6 @@ type Repository interface {
 	DeletePost(ctx context.Context, id string) (err error)
 	InsertComment(ctx context.Context, comment postDomain.Comment) (err error)
 	FindAllCommentsByPostID(ctx context.Context, id string) (comments []postDomain.Comment, err error)
+	FindCommentByID(ctx context.Context, id string) (comment postDomain.Comment, err error)
 	DeleteComment(ctx context.Context, id string) (err error)
 }

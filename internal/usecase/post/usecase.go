@@ -13,5 +13,6 @@ type Usecase interface {
 	DeletePost(ctx context.Context, id string) (err error)
 	InsertComment(ctx context.Context, authorId, postId, content string) (err error)
 	GetAllCommentByPostId(ctx context.Context, postId string) (comments []httpCommon.Comment, err error)
+	GetCommentById(ctx context.Context, id string) (comment httpCommon.Comment, err error)
 	DeleteComment(ctx context.Context, id string) (err error)
 }

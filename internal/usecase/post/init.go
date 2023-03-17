@@ -129,6 +129,23 @@ func (p *PostUsecaseImplementation) GetAllCommentByPostId(ctx context.Context, p
 	return
 }
 
+func (p *PostUsecaseImplementation) GetCommentById(ctx context.Context, id string) (comment httpCommon.Comment, err error) {
+	commentObj, err := p.postRepository.FindCommentByID(ctx, id)
+
+	if err != nil {
+		return comment, err
+	}
+
+	comment = httpCommon.Comment{
+		ID:       commentObj.ID.Hex(),
+		AuthorID: commentObj.AuthorId.Hex(),
+		PostID:   commentObj.PostId.Hex(),
+		Content:  commentObj.Content,
+	}
+
+	return
+}
+
 func (p *PostUsecaseImplementation) DeleteComment(ctx context.Context, id string) (err error) {
 	err = p.postRepository.DeleteComment(ctx, id)
 

@@ -69,7 +69,7 @@ type (
 	AddPost struct {
 		Title    string `json:"title" binding:"required"`
 		Content  string `json:"content" binding:"required"`
-		AuthorID string `json:"author_id" binding:"required"`
+		AuthorID string `json:"author_id"`
 	}
 
 	Comment struct {
@@ -81,7 +81,7 @@ type (
 
 	AddComment struct {
 		Content  string `json:"content" binding:"required"`
-		AuthorID string `json:"author_id" binding:"required"`
-		PostID   string `json:"post_id" binding:"required"`
+		AuthorID string `json:"author_id"`
+		PostID   string `json:"post_id"`
 	}
 )

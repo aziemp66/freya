@@ -6,9 +6,9 @@ func (u *User) GetUserRoleString() string {
 
 func (u *User) SetUserRoleString(r string) {
 	switch r {
-	case string(Psychologist):
-		u.Role = Psychologist
+	case string(PSYCHOLOGIST):
+		u.Role = PSYCHOLOGIST
 	default:
-		u.Role = Base
+		u.Role = BASE
 	}
 }

@@ -1,6 +1,6 @@
 package user
 
 const (
-	Base         role = "BASE"
-	Psychologist role = "PSYHCOLOGIST"
+	BASE         role = "base"
+	PSYCHOLOGIST role = "psychologist"
 )

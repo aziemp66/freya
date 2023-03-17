@@ -122,6 +122,22 @@ func (r *PostRepositoryImplementation) FindAllCommentsByPostID(ctx context.Conte
 	return comments, nil
 }
 
+func (r *PostRepositoryImplementation) FindCommentByID(ctx context.Context, id string) (comment postDomain.Comment, err error) {
+	objId, err := primitive.ObjectIDFromHex(id)
+
+	if err != nil {
+		return postDomain.Comment{}, err
+	}
+
+	err = r.db.Collection("comments").FindOne(ctx, postDomain.Comment{ID: objId}).Decode(&comment)
+
+	if err != nil {
+		return postDomain.Comment{}, err
+	}
+
+	return comment, nil
+}
+
 func (r *PostRepositoryImplementation) DeleteComment(ctx context.Context, id string) (err error) {
 	objId, err := primitive.ObjectIDFromHex(id)
 
