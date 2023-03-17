@@ -6,20 +6,17 @@ import (
 	"github.com/aziemp66/freya-be/common/http/middleware"
 	"github.com/aziemp66/freya-be/common/jwt"
 	PostUsecase "github.com/aziemp66/freya-be/internal/usecase/post"
-	UserUseCase "github.com/aziemp66/freya-be/internal/usecase/user"
 	"github.com/gin-gonic/gin"
 )
 
 type PostDeliveryImplementation struct {
 	postUsecase PostUsecase.Usecase
-	userUsecase UserUseCase.Usecase
 	jwtManager  *jwt.JWTManager
 }
 
-func NewPostDelivery(router *gin.RouterGroup, postUsecase PostUsecase.Usecase, userUsecase UserUseCase.Usecase, jwtManager *jwt.JWTManager) *PostDeliveryImplementation {
+func NewPostDelivery(router *gin.RouterGroup, postUsecase PostUsecase.Usecase, jwtManager *jwt.JWTManager) *PostDeliveryImplementation {
 	postDelivery := &PostDeliveryImplementation{
 		postUsecase: postUsecase,
-		userUsecase: userUsecase,
 		jwtManager:  jwtManager,
 	}
 

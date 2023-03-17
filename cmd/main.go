@@ -47,7 +47,7 @@ func main() {
 
 	postRepository := postRepo.NewPostRepositoryImplementation(db)
 	postUseCase := postUc.NewPostUsecaseImplementation(postRepository)
-	postDlv.NewPostDelivery(root, postUseCase, userUseCase, jwtManager)
+	postDlv.NewPostDelivery(root, postUseCase, jwtManager)
 
 	err := httpServer.Router.Run(fmt.Sprintf(":%d", cfg.Port))
 
