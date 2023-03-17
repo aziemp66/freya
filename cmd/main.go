@@ -10,8 +10,11 @@ import (
 	mailCommon "github.com/aziemp66/freya-be/common/mail"
 	passwordCommon "github.com/aziemp66/freya-be/common/password"
 
+	postDlv "github.com/aziemp66/freya-be/internal/delivery/post"
 	userDlv "github.com/aziemp66/freya-be/internal/delivery/user"
+	postRepo "github.com/aziemp66/freya-be/internal/repository/post"
 	userRepo "github.com/aziemp66/freya-be/internal/repository/user"
+	postUc "github.com/aziemp66/freya-be/internal/usecase/post"
 	userUc "github.com/aziemp66/freya-be/internal/usecase/user"
 
 	"github.com/aziemp66/freya-be/common/env"
@@ -41,6 +44,10 @@ func main() {
 	userRepository := userRepo.NewUserRepositoryImplementation(db)
 	userUseCase := userUc.NewUserUsecaseImplementation(userRepository, passwordManager, jwtManager, mailDialer)
 	userDlv.NewUserDelivery(root, userUseCase, jwtManager)
+
+	postRepository := postRepo.NewPostRepositoryImplementation(db)
+	postUseCase := postUc.NewPostUsecaseImplementation(postRepository)
+	postDlv.NewPostDelivery(root, postUseCase, userUseCase, jwtManager)
 
 	err := httpServer.Router.Run(fmt.Sprintf(":%d", cfg.Port))
 

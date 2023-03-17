@@ -16,7 +16,7 @@ type PostDeliveryImplementation struct {
 	jwtManager  *jwt.JWTManager
 }
 
-func NewPostDeliveryImplementation(router *gin.RouterGroup, postUsecase PostUsecase.Usecase, userUsecase UserUseCase.Usecase, jwtManager *jwt.JWTManager) *PostDeliveryImplementation {
+func NewPostDelivery(router *gin.RouterGroup, postUsecase PostUsecase.Usecase, userUsecase UserUseCase.Usecase, jwtManager *jwt.JWTManager) *PostDeliveryImplementation {
 	postDelivery := &PostDeliveryImplementation{
 		postUsecase: postUsecase,
 		userUsecase: userUsecase,
