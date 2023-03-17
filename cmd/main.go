@@ -40,7 +40,7 @@ func main() {
 
 	userRepository := userRepo.NewUserRepositoryImplementation(db)
 	userUseCase := userUc.NewUserUsecaseImplementation(userRepository, passwordManager, jwtManager, mailDialer)
-	userDlv.NewUserDelivery(root, userUseCase)
+	userDlv.NewUserDelivery(root, userUseCase, jwtManager)
 
 	err := httpServer.Router.Run(fmt.Sprintf(":%d", cfg.Port))
 

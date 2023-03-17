@@ -84,7 +84,7 @@ func (u *UserUsecaseImplementation) ForgotPassword(ctx context.Context, email st
 		return err
 	}
 
-	token, err := u.jwtManager.GenerateAuthToken(userData.Email, fmt.Sprintf("%s %s", userData.FirstName, userData.LastName), string(userData.Role), 24*time.Hour)
+	token, err := u.jwtManager.GenerateUserToken(userData.ID.Hex(), userData.Password, 24*time.Hour)
 
 	if err != nil {
 		return err

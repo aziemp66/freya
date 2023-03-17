@@ -2,25 +2,31 @@ package user
 
 import (
 	httpCommon "github.com/aziemp66/freya-be/common/http"
+	"github.com/aziemp66/freya-be/common/http/middleware"
+	"github.com/aziemp66/freya-be/common/jwt"
 	userUserCase "github.com/aziemp66/freya-be/internal/usecase/user"
 	"github.com/gin-gonic/gin"
 )
 
 type UserDelivery struct {
 	UserUseCase userUserCase.Usecase
+	jwtManager  *jwt.JWTManager
 }
 
-func NewUserDelivery(router *gin.RouterGroup, userUseCase userUserCase.Usecase) *UserDelivery {
+func NewUserDelivery(router *gin.RouterGroup, userUseCase userUserCase.Usecase, jwtManager *jwt.JWTManager) *UserDelivery {
 	UserDelivery := &UserDelivery{
 		UserUseCase: userUseCase,
+		jwtManager:  jwtManager,
 	}
 
 	router.POST("/login", UserDelivery.Login)
 	router.POST("/register", UserDelivery.Register)
 	router.POST("/forgot-password", UserDelivery.ForgotPassword)
 	router.POST("/reset-password", UserDelivery.ResetPassword)
-	router.PUT("/update", UserDelivery.Update)
-	router.PUT("/update-password", UserDelivery.UpdatePassword)
+
+	authGroup := router.Group("/", middleware.JWTAuth(jwtManager))
+	authGroup.PUT("/update", UserDelivery.Update)
+	authGroup.PUT("/update-password", UserDelivery.UpdatePassword)
 
 	return UserDelivery
 }
