@@ -12,7 +12,7 @@ type (
 	Comment struct {
 		ID       primitive.ObjectID `bson:"_id,omitempty"`
 		Content  string             `bson:"content,omitempty"`
-		AuthorId string             `bson:"author_id,omitempty"`
+		AuthorId primitive.ObjectID `bson:"author_id,omitempty"`
 		PostId   primitive.ObjectID `bson:"post_id,omitempty"`
 	}
 )
