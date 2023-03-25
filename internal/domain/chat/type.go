@@ -21,8 +21,8 @@ type (
 	Chatroom struct {
 		ID             primitive.ObjectID `bson:"_id,omitempty"`
 		AppointmentID  primitive.ObjectID `bson:"appointment_id,omitempty"`
-		PsychologistID primitive.ObjectID `bson:"psychologist,omitempty"`
-		UserID         primitive.ObjectID `bson:"user,omitempty"`
+		PsychologistID primitive.ObjectID `bson:"psychologist_id,omitempty"`
+		UserID         primitive.ObjectID `bson:"user_id,omitempty"`
 		ChatHistory    []Message          `bson:"chat_history,omitempty"`
 		CreatedAt      time.Time          `bson:"created_at,omitempty"`
 		UpdatedAt      time.Time          `bson:"updated_at,omitempty"`
