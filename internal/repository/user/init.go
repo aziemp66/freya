@@ -2,6 +2,7 @@ package user
 
 import (
 	"context"
+	"time"
 
 	userDomain "github.com/aziemp66/freya-be/internal/domain/user"
 	"go.mongodb.org/mongo-driver/bson"
@@ -18,6 +19,9 @@ func NewUserRepositoryImplementation(db *mongo.Database) *UserRepositoryImplemen
 }
 
 func (r *UserRepositoryImplementation) Insert(ctx context.Context, user userDomain.User) (err error) {
+	user.CreatedAt = time.Now()
+	user.UpdatedAt = time.Now()
+
 	_, err = r.db.Collection("users").InsertOne(ctx, user)
 
 	if err != nil {
@@ -54,6 +58,8 @@ func (r *UserRepositoryImplementation) FindByEmail(ctx context.Context, email st
 }
 
 func (r *UserRepositoryImplementation) Update(ctx context.Context, user userDomain.User) (err error) {
+	user.UpdatedAt = time.Now()
+
 	_, err = r.db.Collection("users").UpdateOne(ctx, bson.M{"_id": user.ID}, bson.M{"$set": user})
 
 	if err != nil {
@@ -70,7 +76,7 @@ func (r *UserRepositoryImplementation) UpdateVerifiedEmail(ctx context.Context, 
 		return err
 	}
 
-	_, err = r.db.Collection("users").UpdateByID(ctx, objId, bson.M{"$set": bson.M{"is_email_verified": true}})
+	_, err = r.db.Collection("users").UpdateByID(ctx, objId, bson.M{"$set": bson.M{"is_email_verified": true, "updated_at": time.Now()}})
 
 	if err != nil {
 		return err
@@ -86,7 +92,7 @@ func (r *UserRepositoryImplementation) UpdatePassword(ctx context.Context, id, p
 		return err
 	}
 
-	_, err = r.db.Collection("users").UpdateByID(ctx, objId, bson.M{"$set": bson.M{"password": password}})
+	_, err = r.db.Collection("users").UpdateByID(ctx, objId, bson.M{"$set": bson.M{"password": password, "updated_at": time.Now()}})
 
 	if err != nil {
 		return err

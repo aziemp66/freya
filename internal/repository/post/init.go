@@ -2,6 +2,7 @@ package post
 
 import (
 	"context"
+	"time"
 
 	postDomain "github.com/aziemp66/freya-be/internal/domain/post"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -17,6 +18,9 @@ func NewPostRepositoryImplementation(db *mongo.Database) *PostRepositoryImplemen
 }
 
 func (r *PostRepositoryImplementation) InsertPost(ctx context.Context, post postDomain.Post) (err error) {
+	post.CreatedAt = time.Now()
+	post.UpdatedAt = time.Now()
+
 	_, err = r.db.Collection("posts").InsertOne(ctx, post)
 
 	if err != nil {
@@ -83,6 +87,9 @@ func (r *PostRepositoryImplementation) DeletePost(ctx context.Context, id string
 }
 
 func (r *PostRepositoryImplementation) InsertComment(ctx context.Context, comment postDomain.Comment) (err error) {
+	comment.CreatedAt = time.Now()
+	comment.UpdatedAt = time.Now()
+
 	_, err = r.db.Collection("comments").InsertOne(ctx, comment)
 
 	if err != nil {
