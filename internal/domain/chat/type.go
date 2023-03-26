@@ -29,6 +29,7 @@ type (
 	}
 
 	Message struct {
+		ID        primitive.ObjectID `bson:"_id,omitempty"`
 		SenderID  primitive.ObjectID `bson:"sender_id,omitempty"`
 		Content   string             `bson:"content,omitempty"`
 		CreatedAt time.Time          `bson:"created_at,omitempty"`

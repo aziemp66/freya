@@ -218,10 +218,18 @@ func (c *ChatRepositoryImplementaion) FindMessageByID(ctx context.Context, id st
 		return message, err
 	}
 
-	err = c.db.Collection("chatrooms").FindOne(ctx, bson.M{"messages._id": objId}).Decode(&message)
+	var chatroom chatDomain.Chatroom
+
+	err = c.db.Collection("chatrooms").FindOne(ctx, bson.D{{Key: "messages", Value: bson.D{{Key: "$elemMatch", Value: bson.D{{Key: "_id", Value: objId}}}}}}).Decode(&chatroom)
 
 	if err != nil {
 		return message, err
+	}
+
+	for _, msg := range chatroom.Messages {
+		if msg.ID == objId {
+			message = msg
+		}
 	}
 
 	return message, nil
@@ -234,7 +242,7 @@ func (c *ChatRepositoryImplementaion) DeleteMessage(ctx context.Context, id stri
 		return err
 	}
 
-	_, err = c.db.Collection("chatrooms").UpdateOne(ctx, bson.M{"messages._id": objId}, bson.M{"$pull": bson.M{"messages": bson.M{"_id": objId}}})
+	_, err = c.db.Collection("chatrooms").UpdateOne(ctx, bson.D{{Key: "messages", Value: bson.D{{Key: "$elemMatch", Value: bson.D{{Key: "_id", Value: objId}}}}}}, bson.M{"$pull": bson.M{"messages": bson.M{"_id": objId}}})
 
 	if err != nil {
 		return err
