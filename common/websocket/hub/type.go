@@ -2,8 +2,11 @@ package hub
 
 import (
 	wsCommon "github.com/aziemp66/freya-be/common/websocket"
+	"github.com/gin-gonic/gin"
 
 	"github.com/gorilla/websocket"
+
+	chatUC "github.com/aziemp66/freya-be/internal/usecase/chat"
 )
 
 type (
@@ -32,8 +35,11 @@ type (
 	}
 
 	Subscription struct {
-		Conn *Connection
-		Room string
+		Ctx         *gin.Context
+		Conn        *Connection
+		Room        string
+		Sender      string
+		ChatUsecase chatUC.Usecase
 	}
 
 	message struct {

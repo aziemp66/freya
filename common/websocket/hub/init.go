@@ -7,6 +7,7 @@ import (
 
 	"github.com/gorilla/websocket"
 
+	errorCommon "github.com/aziemp66/freya-be/common/error"
 	wsCommon "github.com/aziemp66/freya-be/common/websocket"
 )
 
@@ -76,6 +77,7 @@ func (s Subscription) ReadPump() {
 			break
 		}
 		m := message{readPayload, s.Room}
+
 		H.Broadcast <- m
 	}
 }
@@ -101,8 +103,17 @@ func (s *Subscription) WritePump() {
 				c.write(wsCommon.MessagePayload{})
 				return
 			}
+
+			err := s.ChatUsecase.InsertMessageToChatroom(s.Ctx, s.Sender, message.Message, s.Room)
+
+			if err != nil {
+				fmt.Printf("error: %v", err.Error())
+				s.Ctx.AbortWithError(500, errorCommon.NewInvariantError(err.Error()))
+				return
+			}
+
 			if err := c.write(message); err != nil {
-				log.Fatalf("error: %v", err)
+				s.Ctx.AbortWithError(500, errorCommon.NewInvariantError(err.Error()))
 				return
 			}
 		case <-ticker.C:
