@@ -4,7 +4,6 @@ import (
 	"context"
 	"os/user"
 	"testing"
-	"time"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -12,7 +11,9 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 
 	userDomain "github.com/aziemp66/freya-be/internal/domain/user"
-	userRepository "github.com/aziemp66/freya-be/internal/repository/user"
+	// userRepository "github.com/aziemp66/freya-be/internal/repository/user"
+
+	chatDomain "github.com/aziemp66/freya-be/internal/domain/chat"
 )
 
 var ctx = context.Background()
@@ -44,17 +45,50 @@ func generateDB() *mongo.Database {
 func TestDBInsert(t *testing.T) {
 	db := generateDB()
 
-	db.Collection("users").InsertOne(ctx, userDomain.User{
-		ID:              primitive.NewObjectID(),
-		FirstName:       "Aizen",
-		LastName:        "Melza",
-		Email:           "Aizen@gmail.com",
-		Password:        "blaablablba",
-		Role:            "user",
-		IsEmailVerified: false,
-		CreatedAt:       time.Now(),
-		UpdatedAt:       time.Now(),
-	})
+	// db.Collection("chatrooms").InsertOne(ctx, chatDomain.Chatroom{
+	// 	ID:             primitive.NewObjectID(),
+	// 	UserID:         primitive.NewObjectID(),
+	// 	PsychologistID: primitive.NewObjectID(),
+	// 	Messages:       []chatDomain.Message{},
+	// 	CreatedAt:      time.Now(),
+	// 	UpdatedAt:      time.Now(),
+	// })
+
+	// objId, err := primitive.ObjectIDFromHex("641fcfe51847d9be89237f58")
+
+	// if err != nil {
+	// 	t.Error(err)
+	// }
+
+	// db.Collection(("chatrooms")).UpdateOne(ctx, bson.M{"_id": objId}, bson.M{"$push": bson.M{"messages": chatDomain.Message{
+	// 	ID:        primitive.NewObjectID(),
+	// 	SenderID:  primitive.NewObjectID(),
+	// 	Content:   "Ngentot",
+	// 	CreatedAt: time.Now(),
+	// 	UpdatedAt: time.Now(),
+	// }}})
+
+	var messageReturn chatDomain.Message
+
+	objId, err := primitive.ObjectIDFromHex("641fd102eb63b8837d78ffa3")
+
+	if err != nil {
+		t.Error(err)
+	}
+
+	var chatroom chatDomain.Chatroom
+
+	db.Collection("chatrooms").FindOne(
+		context.TODO(),
+		bson.D{{Key: "messages", Value: bson.D{{Key: "$elemMatch", Value: bson.D{{Key: "_id", Value: objId}}}}}}).Decode(&chatroom)
+
+	for _, message := range chatroom.Messages {
+		if message.ID == objId {
+			messageReturn = message
+		}
+	}
+
+	t.Log(messageReturn)
 }
 
 func TestDBRead(t *testing.T) {
@@ -75,25 +109,38 @@ func TestDBRead(t *testing.T) {
 func TestDBUpdate(t *testing.T) {
 	db := generateDB()
 
-	userRepository := userRepository.NewUserRepositoryImplementation(db)
+	// userRepository := userRepository.NewUserRepositoryImplementation(db)
 
-	objectid, err := primitive.ObjectIDFromHex("6402cfe8d51715ec946fe123")
+	// objectid, err := primitive.ObjectIDFromHex("6402cfe8d51715ec946fe123")
+
+	// if err != nil {
+	// 	t.Error(err)
+	// }
+
+	// user := userDomain.User{
+	// 	ID:       objectid,
+	// 	LastName: "Melza",
+	// }
+
+	// ctx := context.Background()
+	// err = userRepository.Update(ctx, user)
+
+	// if err != nil {
+	// 	t.Error(err)
+	// }
+
+	objId, err := primitive.ObjectIDFromHex("641fd102eb63b8837d78ffa3")
 
 	if err != nil {
 		t.Error(err)
 	}
 
-	user := userDomain.User{
-		ID:       objectid,
-		LastName: "Melza",
-	}
-
-	ctx := context.Background()
-	err = userRepository.Update(ctx, user)
+	_, err = db.Collection("chatrooms").UpdateOne(ctx, bson.D{{Key: "messages", Value: bson.D{{Key: "$elemMatch", Value: bson.D{{Key: "_id", Value: objId}}}}}}, bson.M{"$pull": bson.M{"messages": bson.M{"_id": objId}}})
 
 	if err != nil {
 		t.Error(err)
 	}
+
 }
 
 func TestDBReplace(t *testing.T) {
