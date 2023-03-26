@@ -16,7 +16,7 @@ type Repository interface {
 	FindChatroomByID(ctx context.Context, id string) (chatroom chatDomain.Chatroom, err error)
 	FindChatroomByAppointmentID(ctx context.Context, id string) (chatrooms chatDomain.Chatroom, err error)
 	DeleteChatroom(ctx context.Context, id string) (err error)
-	InsertMessage(ctx context.Context, message chatDomain.Message) (err error)
+	InsertMessageToChatroom(ctx context.Context, message chatDomain.Message, chatroomId string) (err error)
 	FindAllMessagesByChatroomID(ctx context.Context, id string) (messages []chatDomain.Message, err error)
 	FindMessageByID(ctx context.Context, id string) (message chatDomain.Message, err error)
 	DeleteMessage(ctx context.Context, id string) (err error)

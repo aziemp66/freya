@@ -5,6 +5,7 @@ import (
 	"time"
 
 	chatDomain "github.com/aziemp66/freya-be/internal/domain/chat"
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 )
@@ -37,7 +38,7 @@ func (c *ChatRepositoryImplementaion) FindAppointmentByID(ctx context.Context, i
 		return appointment, err
 	}
 
-	err = c.db.Collection("appointments").FindOne(ctx, primitive.M{"_id": objId}).Decode(&appointment)
+	err = c.db.Collection("appointments").FindOne(ctx, bson.M{"_id": objId}).Decode(&appointment)
 
 	if err != nil {
 		return appointment, err
@@ -53,7 +54,7 @@ func (c *ChatRepositoryImplementaion) FindAppointmentByUserID(ctx context.Contex
 		return appointments, err
 	}
 
-	cursor, err := c.db.Collection("appointments").Find(ctx, primitive.M{"user_id": objId})
+	cursor, err := c.db.Collection("appointments").Find(ctx, bson.M{"user_id": objId})
 
 	if err != nil {
 		return appointments, err
@@ -77,7 +78,7 @@ func (c *ChatRepositoryImplementaion) FindAppointmentByPsychologistID(ctx contex
 		return appointments, err
 	}
 
-	cursor, err := c.db.Collection("appointments").Find(ctx, primitive.M{"psychologist_id": objId})
+	cursor, err := c.db.Collection("appointments").Find(ctx, bson.M{"psychologist_id": objId})
 
 	if err != nil {
 		return appointments, err
@@ -101,7 +102,7 @@ func (c *ChatRepositoryImplementaion) UpdateAppointmentStatus(ctx context.Contex
 		return err
 	}
 
-	_, err = c.db.Collection("appointments").UpdateOne(ctx, primitive.M{"_id": objId}, primitive.M{"$set": primitive.M{"status": status}})
+	_, err = c.db.Collection("appointments").UpdateOne(ctx, bson.M{"_id": objId}, bson.M{"$set": bson.M{"status": status}})
 
 	if err != nil {
 		return err
@@ -130,7 +131,7 @@ func (c *ChatRepositoryImplementaion) FindChatroomByID(ctx context.Context, id s
 		return chatroom, err
 	}
 
-	err = c.db.Collection("chatrooms").FindOne(ctx, primitive.M{"_id": objId}).Decode(&chatroom)
+	err = c.db.Collection("chatrooms").FindOne(ctx, bson.M{"_id": objId}).Decode(&chatroom)
 
 	if err != nil {
 		return chatroom, err
@@ -146,7 +147,7 @@ func (c *ChatRepositoryImplementaion) FindChatroomByAppointmentID(ctx context.Co
 		return chatroom, err
 	}
 
-	err = c.db.Collection("chatrooms").FindOne(ctx, primitive.M{"appointment_id": objId}).Decode(&chatroom)
+	err = c.db.Collection("chatrooms").FindOne(ctx, bson.M{"appointment_id": objId}).Decode(&chatroom)
 
 	if err != nil {
 		return chatroom, err
@@ -162,7 +163,7 @@ func (c *ChatRepositoryImplementaion) DeleteChatroom(ctx context.Context, id str
 		return err
 	}
 
-	_, err = c.db.Collection("chatrooms").DeleteOne(ctx, primitive.M{"_id": objId})
+	_, err = c.db.Collection("chatrooms").DeleteOne(ctx, bson.M{"_id": objId})
 
 	if err != nil {
 		return err
@@ -171,11 +172,17 @@ func (c *ChatRepositoryImplementaion) DeleteChatroom(ctx context.Context, id str
 	return nil
 }
 
-func (c *ChatRepositoryImplementaion) InsertMessage(ctx context.Context, message chatDomain.Message) (err error) {
+func (c *ChatRepositoryImplementaion) InsertMessageToChatrooms(ctx context.Context, message chatDomain.Message, chatroomId string) (err error) {
 	message.CreatedAt = time.Now()
 	message.UpdatedAt = time.Now()
 
-	_, err = c.db.Collection("messages").InsertOne(ctx, message)
+	objId, err := primitive.ObjectIDFromHex(chatroomId)
+
+	if err != nil {
+		return err
+	}
+
+	_, err = c.db.Collection("chatrooms").UpdateOne(ctx, bson.M{"_id": objId}, bson.M{"$push": bson.M{"messages": message}})
 
 	if err != nil {
 		return err
@@ -191,19 +198,15 @@ func (c *ChatRepositoryImplementaion) FindAllMessagesByChatroomID(ctx context.Co
 		return messages, err
 	}
 
-	cursor, err := c.db.Collection("messages").Find(ctx, primitive.M{"chatroom_id": objId})
+	var chatroom chatDomain.Chatroom
+
+	err = c.db.Collection("chatrooms").FindOne(ctx, bson.M{"_id": objId}).Decode(&chatroom)
 
 	if err != nil {
 		return messages, err
 	}
 
-	defer cursor.Close(ctx)
-
-	err = cursor.All(ctx, &messages)
-
-	if err != nil {
-		return messages, err
-	}
+	messages = chatroom.Messages
 
 	return messages, nil
 }
@@ -215,7 +218,7 @@ func (c *ChatRepositoryImplementaion) FindMessageByID(ctx context.Context, id st
 		return message, err
 	}
 
-	err = c.db.Collection("messages").FindOne(ctx, primitive.M{"_id": objId}).Decode(&message)
+	err = c.db.Collection("chatrooms").FindOne(ctx, bson.M{"messages._id": objId}).Decode(&message)
 
 	if err != nil {
 		return message, err
@@ -231,7 +234,7 @@ func (c *ChatRepositoryImplementaion) DeleteMessage(ctx context.Context, id stri
 		return err
 	}
 
-	_, err = c.db.Collection("messages").DeleteOne(ctx, primitive.M{"_id": objId})
+	_, err = c.db.Collection("chatrooms").UpdateOne(ctx, bson.M{"messages._id": objId}, bson.M{"$pull": bson.M{"messages": bson.M{"_id": objId}}})
 
 	if err != nil {
 		return err

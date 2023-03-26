@@ -23,6 +23,7 @@ type (
 		AppointmentID  primitive.ObjectID `bson:"appointment_id,omitempty"`
 		PsychologistID primitive.ObjectID `bson:"psychologist_id,omitempty"`
 		UserID         primitive.ObjectID `bson:"user_id,omitempty"`
+		Messages       []Message          `bson:"messages,omitempty"`
 		CreatedAt      time.Time          `bson:"created_at,omitempty"`
 		UpdatedAt      time.Time          `bson:"updated_at,omitempty"`
 	}
