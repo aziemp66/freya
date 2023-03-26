@@ -55,16 +55,10 @@ func (r *PostRepositoryImplementation) FindAllPosts(ctx context.Context) (posts 
 
 	defer cursor.Close(ctx)
 
-	for cursor.Next(ctx) {
-		var post postDomain.Post
+	err = cursor.All(ctx, &posts)
 
-		err = cursor.Decode(&post)
-
-		if err != nil {
-			return nil, err
-		}
-
-		posts = append(posts, post)
+	if err != nil {
+		return nil, err
 	}
 
 	return posts, nil

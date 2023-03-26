@@ -57,6 +57,24 @@ func (r *UserRepositoryImplementation) FindByEmail(ctx context.Context, email st
 	return user, nil
 }
 
+func (r *UserRepositoryImplementation) FindAllPsychologists(ctx context.Context) (users []userDomain.User, err error) {
+	cursor, err := r.db.Collection("users").Find(ctx, bson.M{"role": "psychologist"})
+
+	if err != nil {
+		return users, err
+	}
+
+	defer cursor.Close(ctx)
+
+	err = cursor.All(ctx, &users)
+
+	if err != nil {
+		return users, err
+	}
+
+	return users, nil
+}
+
 func (r *UserRepositoryImplementation) Update(ctx context.Context, user userDomain.User) (err error) {
 	user.UpdatedAt = time.Now()
 

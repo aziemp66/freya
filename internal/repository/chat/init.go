@@ -59,16 +59,12 @@ func (c *ChatRepositoryImplementaion) FindAppointmentByUserID(ctx context.Contex
 		return appointments, err
 	}
 
-	for cursor.Next(ctx) {
-		var appointment chatDomain.Chatroom
+	defer cursor.Close(ctx)
 
-		err = cursor.Decode(&appointment)
+	err = cursor.All(ctx, &appointments)
 
-		if err != nil {
-			return appointments, err
-		}
-
-		appointments = append(appointments, appointment)
+	if err != nil {
+		return appointments, err
 	}
 
 	return appointments, nil
@@ -87,16 +83,12 @@ func (c *ChatRepositoryImplementaion) FindAppointmentByPsychologistID(ctx contex
 		return appointments, err
 	}
 
-	for cursor.Next(ctx) {
-		var appointment chatDomain.Chatroom
+	defer cursor.Close(ctx)
 
-		err = cursor.Decode(&appointment)
+	err = cursor.All(ctx, &appointments)
 
-		if err != nil {
-			return appointments, err
-		}
-
-		appointments = append(appointments, appointment)
+	if err != nil {
+		return appointments, err
 	}
 
 	return appointments, nil
@@ -205,17 +197,12 @@ func (c *ChatRepositoryImplementaion) FindAllMessagesByChatroomID(ctx context.Co
 		return messages, err
 	}
 
-	for cursor.Next(ctx) {
-		var message chatDomain.Message
+	defer cursor.Close(ctx)
 
-		err = cursor.Decode(&message)
+	err = cursor.All(ctx, &messages)
 
-		if err != nil {
-			return messages, err
-		}
-
-		messages = append(messages, message)
-
+	if err != nil {
+		return messages, err
 	}
 
 	return messages, nil
