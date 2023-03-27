@@ -6,4 +6,7 @@ type (
 		User    string `json:"user"`
 		Message string `json:"message"`
 	}
+	ReadPayload struct {
+		Message string `json:"message"`
+	}
 )

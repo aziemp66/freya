@@ -67,7 +67,7 @@ func (s Subscription) ReadPump() {
 	c.Ws.SetReadDeadline(time.Now().Add(wsCommon.PongWait))
 	c.Ws.SetPongHandler(func(string) error { c.Ws.SetReadDeadline(time.Now().Add(wsCommon.PongWait)); return nil })
 	for {
-		var readPayload wsCommon.MessagePayload
+		var readPayload wsCommon.ReadPayload
 
 		err := c.Ws.ReadJSON(&readPayload)
 		if err != nil {
@@ -76,7 +76,15 @@ func (s Subscription) ReadPump() {
 			}
 			break
 		}
-		m := message{readPayload, s.Room}
+
+		user := s.Ctx.GetString("user_id")
+
+		messagePayload := wsCommon.MessagePayload{
+			User:    user,
+			Message: readPayload.Message,
+		}
+
+		m := message{messagePayload, s.Room}
 
 		H.Broadcast <- m
 	}
@@ -104,7 +112,9 @@ func (s *Subscription) WritePump() {
 				return
 			}
 
-			err := s.ChatUsecase.InsertMessageToChatroom(s.Ctx, s.Sender, message.Message, s.Room)
+			sender := s.Ctx.GetString("user_id")
+
+			err := s.ChatUsecase.InsertMessageToChatroom(s.Ctx, sender, message.Message, s.Room)
 
 			if err != nil {
 				fmt.Printf("error: %v", err.Error())

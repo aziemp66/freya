@@ -38,7 +38,6 @@ type (
 		Ctx         *gin.Context
 		Conn        *Connection
 		Room        string
-		Sender      string
 		ChatUsecase chatUC.Usecase
 	}
 
