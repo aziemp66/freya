@@ -118,6 +118,15 @@ func (c *ChatUsecaseImplementation) FindAppointmentByPsychologistID(ctx context.
 }
 
 func (c *ChatUsecaseImplementation) UpdateAppointmentStatus(ctx context.Context, id string, status string) (err error) {
+	// if status is not equal to predefined status, return error
+	if status != httpCommon.APPOINTMENTPENDING &&
+		status != httpCommon.APPOINTMENTACCEPTED &&
+		status != httpCommon.APPOINTMENTREJECTED &&
+		status != httpCommon.APPOINTMENTCOMPLETED &&
+		status != httpCommon.APPOINTMENTCANCELED {
+		return
+	}
+
 	err = c.chatRepository.UpdateAppointmentStatus(ctx, id, status)
 
 	if err != nil {
