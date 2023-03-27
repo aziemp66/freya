@@ -2,12 +2,13 @@ package chat
 
 import (
 	"context"
+	"time"
 
 	httpCommon "github.com/aziemp66/freya-be/common/http"
 )
 
 type Usecase interface {
-	InsertAppointment(ctx context.Context, pyschologistID string, userID string) (err error)
+	InsertAppointment(ctx context.Context, pyschologistID string, userID string, date time.Time) (err error)
 	FindAppointmentByID(ctx context.Context, id string) (appointment httpCommon.Appointment, err error)
 	FindAppointmentByUserID(ctx context.Context, id string) (appointments []httpCommon.Appointment, err error)
 	FindAppointmentByPsychologistID(ctx context.Context, id string) (appointments []httpCommon.Appointment, err error)

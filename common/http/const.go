@@ -1,5 +1,8 @@
 package http
 
 const (
-	LOGFILE = "application.log"
+	LOGFILE             = "application.log"
+	APPOINTMENTPENDING  = "pending"
+	APPOINTMENTACCEPTED = "accepted"
+	APPOINTMENTREJECTED = "rejected"
 )
