@@ -111,9 +111,7 @@ func (s *Subscription) WritePump() {
 				return
 			}
 
-			sender := s.Ctx.GetString("user_id")
-
-			err := s.ChatUsecase.InsertMessageToChatroom(s.Ctx, sender, message.Message, s.Room)
+			err := s.ChatUsecase.InsertMessageToChatroom(s.Ctx, message.User, message.Message, s.Room)
 
 			if err != nil {
 				fmt.Printf("error: %v", err.Error())
