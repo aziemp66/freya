@@ -76,10 +76,10 @@ func (s Subscription) ReadPump() {
 			break
 		}
 
-		user := s.Ctx.GetString("user_id")
+		userId, _, _, _ := s.JwtManager.VerifyAuthToken(readPayload.Token)
 
 		messagePayload := MessagePayload{
-			User:    user,
+			User:    userId,
 			Message: readPayload.Message,
 		}
 
