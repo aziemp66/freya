@@ -8,7 +8,6 @@ import (
 	"github.com/gorilla/websocket"
 
 	wsCommon "github.com/aziemp66/freya-be/common/websocket"
-	wsHub "github.com/aziemp66/freya-be/common/websocket/hub"
 
 	chatUsecase "github.com/aziemp66/freya-be/internal/usecase/chat"
 )
@@ -26,9 +25,9 @@ func ServeWebSocket(ctx *gin.Context, chatUC chatUsecase.Usecase, roomId string)
 		log.Println(err.Error())
 		return
 	}
-	c := &wsHub.Connection{Send: make(chan wsCommon.MessagePayload), Ws: ws}
-	s := wsHub.Subscription{Ctx: ctx, ChatUsecase: chatUC, Conn: c, Room: roomId}
-	wsHub.H.Register <- s
+	c := &wsCommon.Connection{Send: make(chan wsCommon.MessagePayload), Ws: ws}
+	s := wsCommon.Subscription{Ctx: ctx, ChatUsecase: chatUC, Conn: c, Room: roomId}
+	wsCommon.H.Register <- s
 	go s.WritePump()
 	go s.ReadPump()
 }

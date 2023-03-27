@@ -1,4 +1,4 @@
-package hub
+package websocket
 
 import (
 	"fmt"
@@ -8,7 +8,6 @@ import (
 	"github.com/gorilla/websocket"
 
 	errorCommon "github.com/aziemp66/freya-be/common/error"
-	wsCommon "github.com/aziemp66/freya-be/common/websocket"
 )
 
 var H = hub{
@@ -63,11 +62,11 @@ func (s Subscription) ReadPump() {
 		H.Unregister <- s
 		c.Ws.Close()
 	}()
-	c.Ws.SetReadLimit(wsCommon.MaxMessageSize)
-	c.Ws.SetReadDeadline(time.Now().Add(wsCommon.PongWait))
-	c.Ws.SetPongHandler(func(string) error { c.Ws.SetReadDeadline(time.Now().Add(wsCommon.PongWait)); return nil })
+	c.Ws.SetReadLimit(MaxMessageSize)
+	c.Ws.SetReadDeadline(time.Now().Add(PongWait))
+	c.Ws.SetPongHandler(func(string) error { c.Ws.SetReadDeadline(time.Now().Add(PongWait)); return nil })
 	for {
-		var readPayload wsCommon.ReadPayload
+		var readPayload ReadPayload
 
 		err := c.Ws.ReadJSON(&readPayload)
 		if err != nil {
@@ -79,7 +78,7 @@ func (s Subscription) ReadPump() {
 
 		user := s.Ctx.GetString("user_id")
 
-		messagePayload := wsCommon.MessagePayload{
+		messagePayload := MessagePayload{
 			User:    user,
 			Message: readPayload.Message,
 		}
@@ -91,15 +90,15 @@ func (s Subscription) ReadPump() {
 }
 
 // write writes a message with the given message type and payload.
-func (c *Connection) write(payload wsCommon.MessagePayload) error {
-	c.Ws.SetWriteDeadline(time.Now().Add(wsCommon.WriteWait))
+func (c *Connection) write(payload MessagePayload) error {
+	c.Ws.SetWriteDeadline(time.Now().Add(WriteWait))
 	return c.Ws.WriteJSON(payload)
 }
 
 // writePump pumps messages from the hub to the websocket Connection.
 func (s *Subscription) WritePump() {
 	c := s.Conn
-	ticker := time.NewTicker(wsCommon.PingPeriod)
+	ticker := time.NewTicker(PingPeriod)
 	defer func() {
 		ticker.Stop()
 		c.Ws.Close()
@@ -108,7 +107,7 @@ func (s *Subscription) WritePump() {
 		select {
 		case message, ok := <-c.Send:
 			if !ok {
-				c.write(wsCommon.MessagePayload{})
+				c.write(MessagePayload{})
 				return
 			}
 
@@ -127,7 +126,7 @@ func (s *Subscription) WritePump() {
 				return
 			}
 		case <-ticker.C:
-			if err := c.write(wsCommon.MessagePayload{}); err != nil {
+			if err := c.write(MessagePayload{}); err != nil {
 				log.Fatalf("error: %v", err)
 				return
 			}
