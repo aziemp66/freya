@@ -3,19 +3,18 @@ package chat
 import (
 	"time"
 
-	userDomain "github.com/aziemp66/freya-be/internal/domain/user"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type (
 	Appointment struct {
-		ID           primitive.ObjectID `bson:"_id,omitempty"`
-		Psychologist userDomain.User    `bson:"psychologist,omitempty"`
-		User         userDomain.User    `bson:"user,omitempty"`
-		Status       string             `bson:"status,omitempty"`
-		Date         time.Time          `bson:"date,omitempty"`
-		CreatedAt    time.Time          `bson:"created_at,omitempty"`
-		UpdatedAt    time.Time          `bson:"updated_at,omitempty"`
+		ID             primitive.ObjectID `bson:"_id,omitempty"`
+		PsychologistID primitive.ObjectID `bson:"psychologist_id,omitempty"`
+		UserID         primitive.ObjectID `bson:"user_id,omitempty"`
+		Status         string             `bson:"status,omitempty"`
+		Date           time.Time          `bson:"date,omitempty"`
+		CreatedAt      time.Time          `bson:"created_at,omitempty"`
+		UpdatedAt      time.Time          `bson:"updated_at,omitempty"`
 	}
 
 	Chatroom struct {

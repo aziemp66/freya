@@ -84,4 +84,42 @@ type (
 		AuthorID string `json:"author_id"`
 		PostID   string `json:"post_id"`
 	}
+
+	Appointment struct {
+		Id             string    `json:"id"`
+		PsychologistId string    `json:"psychologist_id"`
+		UserId         string    `json:"user_id"`
+		Status         string    `json:"status"`
+		Date           time.Time `json:"date"`
+		CreatedAt      time.Time `json:"created_at"`
+		UpdatedAt      time.Time `json:"updated_at"`
+	}
+
+	Chatroom struct {
+		Id             string    `json:"id"`
+		AppointmentId  string    `json:"appointment_id"`
+		PsychologistId string    `json:"psychologist_id"`
+		UserId         string    `json:"user_id"`
+		Messages       []Message `json:"messages"`
+		CreatedAt      time.Time `json:"created_at"`
+		UpdatedAt      time.Time `json:"updated_at"`
+	}
+
+	Message struct {
+		Id        string    `json:"id"`
+		SenderId  string    `json:"sender_id"`
+		Content   string    `json:"content"`
+		CreatedAt time.Time `json:"created_at"`
+		UpdatedAt time.Time `json:"updated_at"`
+	}
+
+	AddAppointment struct {
+		PsychologistId string    `json:"psychologist_id" binding:"required"`
+		Date           time.Time `json:"date" binding:"required"`
+	}
+
+	AddMessage struct {
+		Content    string `json:"content" binding:"required"`
+		ChatroomId string `json:"chatroom_id" binding:"required"`
+	}
 )
