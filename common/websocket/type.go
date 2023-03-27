@@ -5,6 +5,7 @@ import (
 
 	"github.com/gorilla/websocket"
 
+	jwtCommon "github.com/aziemp66/freya-be/common/jwt"
 	chatUC "github.com/aziemp66/freya-be/internal/usecase/chat"
 )
 
@@ -16,6 +17,7 @@ type (
 	}
 	// WebSocket Read Payload
 	ReadPayload struct {
+		Token   string `json:"token"`
 		Message string `json:"message"`
 	}
 
@@ -48,6 +50,7 @@ type (
 		Conn        *Connection
 		Room        string
 		ChatUsecase chatUC.Usecase
+		JwtManager  jwtCommon.JWTManager
 	}
 
 	message struct {
