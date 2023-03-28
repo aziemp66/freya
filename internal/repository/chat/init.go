@@ -20,7 +20,7 @@ func NewChatRepositoryImplementaion(db *mongo.Database) *ChatRepositoryImplement
 	return &ChatRepositoryImplementaion{db}
 }
 
-func (c *ChatRepositoryImplementaion) InsertAppointment(ctx context.Context, appointment chatDomain.Chatroom) (err error) {
+func (c *ChatRepositoryImplementaion) InsertAppointment(ctx context.Context, appointment chatDomain.Appointment) (err error) {
 	appointment.CreatedAt = time.Now()
 	appointment.UpdatedAt = time.Now()
 
@@ -33,7 +33,7 @@ func (c *ChatRepositoryImplementaion) InsertAppointment(ctx context.Context, app
 	return nil
 }
 
-func (c *ChatRepositoryImplementaion) FindAppointmentByID(ctx context.Context, id string) (appointment chatDomain.Chatroom, err error) {
+func (c *ChatRepositoryImplementaion) FindAppointmentByID(ctx context.Context, id string) (appointment chatDomain.Appointment, err error) {
 	objId, err := primitive.ObjectIDFromHex(id)
 
 	if err != nil {
@@ -49,7 +49,7 @@ func (c *ChatRepositoryImplementaion) FindAppointmentByID(ctx context.Context, i
 	return appointment, nil
 }
 
-func (c *ChatRepositoryImplementaion) FindAppointmentByUserID(ctx context.Context, id string) (appointments []chatDomain.Chatroom, err error) {
+func (c *ChatRepositoryImplementaion) FindAppointmentByUserID(ctx context.Context, id string) (appointments []chatDomain.Appointment, err error) {
 	objId, err := primitive.ObjectIDFromHex(id)
 
 	if err != nil {
@@ -73,7 +73,7 @@ func (c *ChatRepositoryImplementaion) FindAppointmentByUserID(ctx context.Contex
 	return appointments, nil
 }
 
-func (c *ChatRepositoryImplementaion) FindAppointmentByPsychologistID(ctx context.Context, id string) (appointments []chatDomain.Chatroom, err error) {
+func (c *ChatRepositoryImplementaion) FindAppointmentByPsychologistID(ctx context.Context, id string) (appointments []chatDomain.Appointment, err error) {
 	objId, err := primitive.ObjectIDFromHex(id)
 
 	if err != nil {
@@ -174,7 +174,7 @@ func (c *ChatRepositoryImplementaion) DeleteChatroom(ctx context.Context, id str
 	return nil
 }
 
-func (c *ChatRepositoryImplementaion) InsertMessageToChatrooms(ctx context.Context, message chatDomain.Message, chatroomId string) (err error) {
+func (c *ChatRepositoryImplementaion) InsertMessageToChatroom(ctx context.Context, message chatDomain.Message, chatroomId string) (err error) {
 	message.CreatedAt = time.Now()
 	message.UpdatedAt = time.Now()
 

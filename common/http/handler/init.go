@@ -19,7 +19,7 @@ var upgrader = websocket.Upgrader{
 }
 
 // serveWs handles websocket requests from the peer.
-func ServeWebSocket(ctx *gin.Context, chatUC chatUsecase.Usecase, jwtManager jwtCommon.JWTManager, roomId string) {
+func ServeWebSocket(ctx *gin.Context, chatUC chatUsecase.Usecase, jwtManager *jwtCommon.JWTManager, roomId string) {
 	fmt.Print(roomId)
 	ws, err := upgrader.Upgrade(ctx.Writer, ctx.Request, nil)
 	if err != nil {

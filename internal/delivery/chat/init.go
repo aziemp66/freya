@@ -13,10 +13,10 @@ import (
 
 type ChatDeliveryImplementation struct {
 	chatUsecase chatUsecase.Usecase
-	jwtManager  jwtCommon.JWTManager
+	jwtManager  *jwtCommon.JWTManager
 }
 
-func NewChatDeliveryImplementation(router *gin.RouterGroup, chatUsecase chatUsecase.Usecase, jwtManager jwtCommon.JWTManager) *ChatDeliveryImplementation {
+func NewChatDeliveryImplementation(router *gin.RouterGroup, chatUsecase chatUsecase.Usecase, jwtManager *jwtCommon.JWTManager) *ChatDeliveryImplementation {
 	chatDelivery := &ChatDeliveryImplementation{
 		chatUsecase: chatUsecase,
 		jwtManager:  jwtManager,

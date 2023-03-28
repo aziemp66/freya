@@ -50,7 +50,7 @@ type (
 		Conn        *Connection
 		Room        string
 		ChatUsecase chatUC.Usecase
-		JwtManager  jwtCommon.JWTManager
+		JwtManager  *jwtCommon.JWTManager
 	}
 
 	message struct {
