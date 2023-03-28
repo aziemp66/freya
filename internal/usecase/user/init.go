@@ -31,7 +31,7 @@ func (u *UserUsecaseImplementation) Register(ctx context.Context, email, passwor
 	hashedPassword, err := u.passwordManager.HashPassword(password)
 
 	if err != nil {
-		return err
+		return errorCommon.NewInternalServerError("Failed to hash password")
 	}
 
 	err = u.userRepository.Insert(ctx, UserDomain.User{
@@ -66,16 +66,16 @@ func (u *UserUsecaseImplementation) Login(ctx context.Context, email, password s
 	err = u.passwordManager.CheckPasswordHash(password, userData.Password)
 
 	if err != nil {
-		return "", err
+		return "", errorCommon.NewInvariantError("Password or email is wrong")
 	}
 
 	token, err = u.jwtManager.GenerateAuthToken(userData.Email, fmt.Sprintf("%s %s", userData.FirstName, userData.LastName), string(userData.Role), 24*time.Hour)
 
 	if err != nil {
-		return "", err
+		return "", errorCommon.NewInternalServerError("Failed to generate token")
 	}
 
-	return token, nil
+	return token, err
 }
 
 func (u *UserUsecaseImplementation) ForgotPassword(ctx context.Context, email string) (err error) {
@@ -88,7 +88,7 @@ func (u *UserUsecaseImplementation) ForgotPassword(ctx context.Context, email st
 	token, err := u.jwtManager.GenerateUserToken(userData.ID.Hex(), userData.Password, 24*time.Hour)
 
 	if err != nil {
-		return err
+		return errorCommon.NewInternalServerError("Failed to generate token")
 	}
 
 	mailPasswordReset := mailCommon.PasswordReset{
@@ -99,7 +99,7 @@ func (u *UserUsecaseImplementation) ForgotPassword(ctx context.Context, email st
 	mailTemplate, err := mailCommon.RenderPasswordResetTemplate(mailPasswordReset)
 
 	if err != nil {
-		return err
+		return errorCommon.NewInternalServerError("Failed to render mail template")
 	}
 
 	message := mailCommon.NewMessage(u.mailDialer.Username, userData.Email, "Reset Password", mailTemplate)
@@ -107,7 +107,7 @@ func (u *UserUsecaseImplementation) ForgotPassword(ctx context.Context, email st
 	err = u.mailDialer.DialAndSend(message)
 
 	if err != nil {
-		return err
+		return errorCommon.NewInternalServerError("Failed to send mail")
 	}
 
 	return nil
@@ -117,7 +117,7 @@ func (u *UserUsecaseImplementation) ResetPassword(ctx context.Context, id, token
 	newPassword, err = u.passwordManager.HashPassword(newPassword)
 
 	if err != nil {
-		return err
+		return errorCommon.NewInternalServerError("Failed to hash password")
 	}
 
 	user, err := u.userRepository.FindByID(ctx, id)
@@ -129,7 +129,7 @@ func (u *UserUsecaseImplementation) ResetPassword(ctx context.Context, id, token
 	err = u.jwtManager.VerifyUserToken(token, user.Password)
 
 	if err != nil {
-		return err
+		return errorCommon.NewInvariantError("Token is invalid")
 	}
 
 	err = u.userRepository.UpdatePassword(ctx, id, newPassword)
@@ -151,13 +151,13 @@ func (u *UserUsecaseImplementation) UpdatePassword(ctx context.Context, id, oldP
 	err = u.passwordManager.CheckPasswordHash(oldPassword, userData.Password)
 
 	if err != nil {
-		return err
+		return errorCommon.NewInvariantError("Old password is wrong")
 	}
 
 	hashedPassword, err := u.passwordManager.HashPassword(newPassword)
 
 	if err != nil {
-		return err
+		return errorCommon.NewInternalServerError("Failed to hash password")
 	}
 
 	err = u.userRepository.UpdatePassword(ctx, id, hashedPassword)
@@ -195,7 +195,7 @@ func (u *UserUsecaseImplementation) Update(ctx context.Context, id string, user 
 	objId, err := primitive.ObjectIDFromHex(id)
 
 	if err != nil {
-		return err
+		return errorCommon.NewInvariantError("Invalid id format")
 	}
 
 	err = u.userRepository.Update(ctx, UserDomain.User{
