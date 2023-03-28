@@ -36,7 +36,7 @@ type (
 		LastName  string    `json:"last_name" binding:"required"`
 		Email     string    `json:"email" binding:"required,email"`
 		Password  string    `json:"password" binding:"required,gte=8,lte=104"`
-		BirthDay  time.Time `json:"birthday" binding:"required"`
+		BirthDay  string `json:"birthday" binding:"required"`
 	}
 
 	UpdateUser struct {

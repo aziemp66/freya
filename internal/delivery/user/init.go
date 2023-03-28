@@ -1,6 +1,8 @@
 package user
 
 import (
+	"time"
+
 	httpCommon "github.com/aziemp66/freya-be/common/http"
 	"github.com/aziemp66/freya-be/common/http/middleware"
 	"github.com/aziemp66/freya-be/common/jwt"
@@ -61,7 +63,14 @@ func (u *UserDelivery) Register(c *gin.Context) {
 		return
 	}
 
-	err := u.UserUseCase.Register(c, registerRequest.Email, registerRequest.Password, registerRequest.FirstName, registerRequest.LastName, registerRequest.BirthDay)
+	birthDayParse, err := time.Parse("2006-01-02", registerRequest.BirthDay)
+
+	if err != nil {
+		c.Error(err)
+		return
+	}
+
+	err = u.UserUseCase.Register(c, registerRequest.Email, registerRequest.Password, registerRequest.FirstName, registerRequest.LastName, birthDayParse)
 
 	if err != nil {
 		c.Error(err)
