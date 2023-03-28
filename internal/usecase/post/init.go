@@ -3,6 +3,7 @@ package post
 import (
 	"context"
 
+	errorCommon "github.com/aziemp66/freya-be/common/error"
 	httpCommon "github.com/aziemp66/freya-be/common/http"
 	PostDomain "github.com/aziemp66/freya-be/internal/domain/post"
 	PostRepository "github.com/aziemp66/freya-be/internal/repository/post"
@@ -22,7 +23,7 @@ func (p *PostUsecaseImplementation) InsertPost(ctx context.Context, authorId, ti
 	objId, err := primitive.ObjectIDFromHex(authorId)
 
 	if err != nil {
-		return err
+		return errorCommon.NewInvariantError("Invalid author id")
 	}
 
 	err = p.postRepository.InsertPost(ctx, PostDomain.Post{
@@ -88,13 +89,13 @@ func (p *PostUsecaseImplementation) InsertComment(ctx context.Context, authorId,
 	authObjId, err := primitive.ObjectIDFromHex(authorId)
 
 	if err != nil {
-		return err
+		return errorCommon.NewInvariantError("Invalid author id")
 	}
 
 	postObjId, err := primitive.ObjectIDFromHex(postId)
 
 	if err != nil {
-		return err
+		return errorCommon.NewInvariantError("Invalid post id")
 	}
 
 	err = p.postRepository.InsertComment(ctx, PostDomain.Comment{

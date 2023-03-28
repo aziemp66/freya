@@ -4,8 +4,10 @@ import (
 	"context"
 	"time"
 
-	httpCommon "github.com/aziemp66/freya-be/common/http"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+
+	errorCommon "github.com/aziemp66/freya-be/common/error"
+	httpCommon "github.com/aziemp66/freya-be/common/http"
 
 	chatDomain "github.com/aziemp66/freya-be/internal/domain/chat"
 	chatRepository "github.com/aziemp66/freya-be/internal/repository/chat"
@@ -22,12 +24,12 @@ func NewChatUsecaseImplementation(chatRepository chatRepository.Repository) *Cha
 func (c *ChatUsecaseImplementation) InsertAppointment(ctx context.Context, pyschologistID string, userID string, date time.Time) (err error) {
 	psyObjID, err := primitive.ObjectIDFromHex(pyschologistID)
 	if err != nil {
-		return
+		return errorCommon.NewInvariantError("Invalid psychologist id")
 	}
 
 	userObjID, err := primitive.ObjectIDFromHex(userID)
 	if err != nil {
-		return
+		return errorCommon.NewInvariantError("Invalid user id")
 	}
 
 	appointment := chatDomain.Appointment{
@@ -124,7 +126,7 @@ func (c *ChatUsecaseImplementation) UpdateAppointmentStatus(ctx context.Context,
 		status != httpCommon.APPOINTMENTREJECTED &&
 		status != httpCommon.APPOINTMENTCOMPLETED &&
 		status != httpCommon.APPOINTMENTCANCELED {
-		return
+		return errorCommon.NewInvariantError("Invalid appointment status")
 	}
 
 	err = c.chatRepository.UpdateAppointmentStatus(ctx, id, status)
@@ -139,17 +141,17 @@ func (c *ChatUsecaseImplementation) UpdateAppointmentStatus(ctx context.Context,
 func (c *ChatUsecaseImplementation) InsertChatroom(ctx context.Context, appointmentID string, psychologistID string, userID string) (err error) {
 	appointmentObjID, err := primitive.ObjectIDFromHex(appointmentID)
 	if err != nil {
-		return
+		return errorCommon.NewInvariantError("Invalid appointment id")
 	}
 
 	psychologistObjID, err := primitive.ObjectIDFromHex(psychologistID)
 	if err != nil {
-		return
+		return errorCommon.NewInvariantError("Invalid psychologist id")
 	}
 
 	userObjID, err := primitive.ObjectIDFromHex(userID)
 	if err != nil {
-		return
+		return errorCommon.NewInvariantError("Invalid user id")
 	}
 
 	chatroom := chatDomain.Chatroom{
@@ -213,7 +215,7 @@ func (c *ChatUsecaseImplementation) DeleteChatroom(ctx context.Context, id strin
 func (c *ChatUsecaseImplementation) InsertMessageToChatroom(ctx context.Context, senderId string, content string, chatRoomID string) (err error) {
 	senderObjID, err := primitive.ObjectIDFromHex(senderId)
 	if err != nil {
-		return
+		return errorCommon.NewInvariantError("Invalid sender id")
 	}
 
 	message := chatDomain.Message{
