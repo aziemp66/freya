@@ -94,6 +94,10 @@ type (
 		UpdatedAt      time.Time `json:"updated_at"`
 	}
 
+	AppointmentStatusUpdate struct {
+		Status string `json:"status" binding:"required"`
+	}
+
 	Chatroom struct {
 		Id             string    `json:"id"`
 		AppointmentId  string    `json:"appointment_id"`
