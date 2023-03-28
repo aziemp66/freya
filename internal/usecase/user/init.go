@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"time"
 
+	errorCommon "github.com/aziemp66/freya-be/common/error"
 	httpCommon "github.com/aziemp66/freya-be/common/http"
 	"github.com/aziemp66/freya-be/common/jwt"
 	mailCommon "github.com/aziemp66/freya-be/common/mail"
@@ -59,7 +60,7 @@ func (u *UserUsecaseImplementation) Login(ctx context.Context, email, password s
 	userData, err := u.userRepository.FindByEmail(ctx, email)
 
 	if err != nil {
-		return "", err
+		return "", errorCommon.NewUnauthorizedError("Password or email is wrong")
 	}
 
 	err = u.passwordManager.CheckPasswordHash(password, userData.Password)

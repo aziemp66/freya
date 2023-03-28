@@ -1,13 +1,9 @@
 package http
 
 import (
-	"errors"
-	"log"
-	"net/http"
+	"github.com/gin-gonic/gin"
 
 	errorCommon "github.com/aziemp66/freya-be/common/error"
-	"github.com/gin-gonic/gin"
-	"github.com/go-playground/validator/v10"
 )
 
 func MiddlewareErrorHandler() gin.HandlerFunc {
@@ -15,44 +11,29 @@ func MiddlewareErrorHandler() gin.HandlerFunc {
 		c.Writer.Header().Add("Content-Type", "application/json")
 		c.Next()
 
-		errs := c.Errors.ByType(gin.ErrorTypeAny)
-		if len(errs) > 0 {
-			err := errs[0]
-			if !err.IsType(gin.ErrorTypePrivate) {
-				var ves validator.ValidationErrors
-				if errors.As(err, &ves) {
-					keys := make(map[string]string)
-					for _, ve := range ves {
-						keys[ve.Field()] = ve.Tag()
-					}
-					c.JSON(c.Writer.Status(), Error{
-						Code:    c.Writer.Status(),
-						Message: err.Error(),
-						Errors:  keys,
-					})
-					return
-				}
-			}
-
-			switch err := err.Err.(type) {
-			case *errorCommon.ClientError:
-				c.JSON(err.Code, Error{
-					Code:    err.Code,
-					Message: err.Message,
+		if len(c.Errors) > 0 {
+			err := c.Errors[0]
+			// if err can be casted to ClientError, then it is a client error
+			if clientError, ok := err.Err.(errorCommon.ClientError); ok {
+				c.JSON(clientError.Code, Error{
+					Code:    clientError.Code,
+					Message: clientError.Message,
 				})
-			default:
-				if err := errorCommon.TranslateDomainError(err); err != nil {
-					c.JSON(err.Code, Error{
-						Code:    err.Code,
-						Message: err.Message,
-					})
-				} else {
-					log.Println("Internal error has occurred, see details:", err)
-					c.JSON(http.StatusInternalServerError, Error{
-						Code:    http.StatusInternalServerError,
-						Message: "Internal server error",
-					})
-				}
+			} else if err.IsType(gin.ErrorTypeBind) {
+				c.JSON(400, Error{
+					Code:    400,
+					Message: err.Err.Error(),
+				})
+			} else if err.IsType(gin.ErrorTypePrivate) {
+				c.JSON(500, Error{
+					Code:    500,
+					Message: "Internal server error",
+				})
+			} else {
+				c.JSON(500, Error{
+					Code:    500,
+					Message: "Internal server error",
+				})
 			}
 		}
 	}

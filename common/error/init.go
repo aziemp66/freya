@@ -10,8 +10,6 @@ type ClientError struct {
 	Message string
 }
 
-var _ error = &ClientError{}
-
 func (e ClientError) Error() string {
 	return fmt.Sprintf("%d\t%s", e.Code, e.Message)
 }
@@ -40,6 +38,13 @@ func NewForbiddenError(msg string) *ClientError {
 func NewUnauthorizedError(msg string) *ClientError {
 	return &ClientError{
 		Code:    http.StatusUnauthorized,
+		Message: msg,
+	}
+}
+
+func NewInternalServerError(msg string) *ClientError {
+	return &ClientError{
+		Code:    http.StatusInternalServerError,
 		Message: msg,
 	}
 }

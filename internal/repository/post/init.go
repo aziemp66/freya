@@ -4,7 +4,9 @@ import (
 	"context"
 	"time"
 
+	errorCommon "github.com/aziemp66/freya-be/common/error"
 	postDomain "github.com/aziemp66/freya-be/internal/domain/post"
+
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 )
@@ -24,7 +26,7 @@ func (r *PostRepositoryImplementation) InsertPost(ctx context.Context, post post
 	_, err = r.db.Collection("posts").InsertOne(ctx, post)
 
 	if err != nil {
-		return err
+		return errorCommon.NewInvariantError("Failed to insert post")
 	}
 
 	return nil
@@ -34,13 +36,13 @@ func (r *PostRepositoryImplementation) FindPostByID(ctx context.Context, id stri
 	objId, err := primitive.ObjectIDFromHex(id)
 
 	if err != nil {
-		return postDomain.Post{}, err
+		return postDomain.Post{}, errorCommon.NewInvariantError("Invalid post id format")
 	}
 
 	err = r.db.Collection("posts").FindOne(ctx, postDomain.Post{ID: objId}).Decode(&post)
 
 	if err != nil {
-		return postDomain.Post{}, err
+		return postDomain.Post{}, errorCommon.NewInvariantError("Post not found")
 	}
 
 	return post, nil
@@ -50,7 +52,7 @@ func (r *PostRepositoryImplementation) FindAllPosts(ctx context.Context) (posts 
 	cursor, err := r.db.Collection("posts").Find(ctx, postDomain.Post{})
 
 	if err != nil {
-		return nil, err
+		return nil, errorCommon.NewInternalServerError("Failed to fetch posts")
 	}
 
 	defer cursor.Close(ctx)
@@ -58,7 +60,7 @@ func (r *PostRepositoryImplementation) FindAllPosts(ctx context.Context) (posts 
 	err = cursor.All(ctx, &posts)
 
 	if err != nil {
-		return nil, err
+		return nil, errorCommon.NewInternalServerError("Failed to fetch posts")
 	}
 
 	return posts, nil
@@ -68,13 +70,13 @@ func (r *PostRepositoryImplementation) DeletePost(ctx context.Context, id string
 	objId, err := primitive.ObjectIDFromHex(id)
 
 	if err != nil {
-		return err
+		return errorCommon.NewInvariantError("Invalid post id format")
 	}
 
 	_, err = r.db.Collection("posts").DeleteOne(ctx, postDomain.Post{ID: objId})
 
 	if err != nil {
-		return err
+		return errorCommon.NewInvariantError("Failed to delete post")
 	}
 
 	return nil
@@ -87,7 +89,7 @@ func (r *PostRepositoryImplementation) InsertComment(ctx context.Context, commen
 	_, err = r.db.Collection("comments").InsertOne(ctx, comment)
 
 	if err != nil {
-		return err
+		return errorCommon.NewInvariantError("Failed to insert comment")
 	}
 
 	return nil
@@ -97,27 +99,21 @@ func (r *PostRepositoryImplementation) FindAllCommentsByPostID(ctx context.Conte
 	objId, err := primitive.ObjectIDFromHex(id)
 
 	if err != nil {
-		return nil, err
+		return nil, errorCommon.NewInvariantError("Invalid post id format")
 	}
 
 	cursor, err := r.db.Collection("comments").Find(ctx, postDomain.Comment{PostId: objId})
 
 	if err != nil {
-		return nil, err
+		return nil, errorCommon.NewInvariantError("Failed to fetch comments")
 	}
 
 	defer cursor.Close(ctx)
 
-	for cursor.Next(ctx) {
-		var comment postDomain.Comment
+	err = cursor.All(ctx, &comments)
 
-		err = cursor.Decode(&comment)
-
-		if err != nil {
-			return nil, err
-		}
-
-		comments = append(comments, comment)
+	if err != nil {
+		return nil, errorCommon.NewInvariantError("Failed to fetch comments")
 	}
 
 	return comments, nil
@@ -127,13 +123,13 @@ func (r *PostRepositoryImplementation) FindCommentByID(ctx context.Context, id s
 	objId, err := primitive.ObjectIDFromHex(id)
 
 	if err != nil {
-		return postDomain.Comment{}, err
+		return postDomain.Comment{}, errorCommon.NewInvariantError("Invalid comment id format")
 	}
 
 	err = r.db.Collection("comments").FindOne(ctx, postDomain.Comment{ID: objId}).Decode(&comment)
 
 	if err != nil {
-		return postDomain.Comment{}, err
+		return postDomain.Comment{}, errorCommon.NewInvariantError("Comment not found")
 	}
 
 	return comment, nil
@@ -143,13 +139,13 @@ func (r *PostRepositoryImplementation) DeleteComment(ctx context.Context, id str
 	objId, err := primitive.ObjectIDFromHex(id)
 
 	if err != nil {
-		return err
+		return errorCommon.NewInvariantError("Invalid comment id format")
 	}
 
 	_, err = r.db.Collection("comments").DeleteOne(ctx, postDomain.Comment{ID: objId})
 
 	if err != nil {
-		return err
+		return errorCommon.NewInvariantError("Failed to delete comment")
 	}
 
 	return nil

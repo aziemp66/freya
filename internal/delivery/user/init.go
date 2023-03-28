@@ -35,6 +35,7 @@ func (u *UserDelivery) Login(c *gin.Context) {
 	var loginRequest httpCommon.Login
 
 	if err := c.ShouldBindJSON(&loginRequest); err != nil {
+		c.Error(err)
 		return
 	}
 

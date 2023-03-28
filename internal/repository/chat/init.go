@@ -4,7 +4,9 @@ import (
 	"context"
 	"time"
 
+	errorCommon "github.com/aziemp66/freya-be/common/error"
 	chatDomain "github.com/aziemp66/freya-be/internal/domain/chat"
+
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -25,7 +27,7 @@ func (c *ChatRepositoryImplementaion) InsertAppointment(ctx context.Context, app
 	_, err = c.db.Collection("appointments").InsertOne(ctx, appointment)
 
 	if err != nil {
-		return err
+		return errorCommon.NewInvariantError("Failed to insert appointment")
 	}
 
 	return nil
@@ -35,13 +37,13 @@ func (c *ChatRepositoryImplementaion) FindAppointmentByID(ctx context.Context, i
 	objId, err := primitive.ObjectIDFromHex(id)
 
 	if err != nil {
-		return appointment, err
+		return appointment, errorCommon.NewInvariantError("Invalid appointment id format")
 	}
 
 	err = c.db.Collection("appointments").FindOne(ctx, bson.M{"_id": objId}).Decode(&appointment)
 
 	if err != nil {
-		return appointment, err
+		return appointment, errorCommon.NewInvariantError("Appointment not found")
 	}
 
 	return appointment, nil
@@ -51,13 +53,13 @@ func (c *ChatRepositoryImplementaion) FindAppointmentByUserID(ctx context.Contex
 	objId, err := primitive.ObjectIDFromHex(id)
 
 	if err != nil {
-		return appointments, err
+		return appointments, errorCommon.NewInvariantError("Invalid user id format")
 	}
 
 	cursor, err := c.db.Collection("appointments").Find(ctx, bson.M{"user_id": objId})
 
 	if err != nil {
-		return appointments, err
+		return appointments, errorCommon.NewInvariantError("Appointment not found")
 	}
 
 	defer cursor.Close(ctx)
@@ -65,7 +67,7 @@ func (c *ChatRepositoryImplementaion) FindAppointmentByUserID(ctx context.Contex
 	err = cursor.All(ctx, &appointments)
 
 	if err != nil {
-		return appointments, err
+		return appointments, errorCommon.NewInvariantError("Appointment not found")
 	}
 
 	return appointments, nil
@@ -75,13 +77,13 @@ func (c *ChatRepositoryImplementaion) FindAppointmentByPsychologistID(ctx contex
 	objId, err := primitive.ObjectIDFromHex(id)
 
 	if err != nil {
-		return appointments, err
+		return appointments, errorCommon.NewInvariantError("Invalid psychologist id format")
 	}
 
 	cursor, err := c.db.Collection("appointments").Find(ctx, bson.M{"psychologist_id": objId})
 
 	if err != nil {
-		return appointments, err
+		return appointments, errorCommon.NewInvariantError("Appointment not found")
 	}
 
 	defer cursor.Close(ctx)
@@ -89,7 +91,7 @@ func (c *ChatRepositoryImplementaion) FindAppointmentByPsychologistID(ctx contex
 	err = cursor.All(ctx, &appointments)
 
 	if err != nil {
-		return appointments, err
+		return appointments, errorCommon.NewInvariantError("Appointment not found")
 	}
 
 	return appointments, nil
@@ -99,13 +101,13 @@ func (c *ChatRepositoryImplementaion) UpdateAppointmentStatus(ctx context.Contex
 	objId, err := primitive.ObjectIDFromHex(id)
 
 	if err != nil {
-		return err
+		return errorCommon.NewInvariantError("Invalid appointment id format")
 	}
 
 	_, err = c.db.Collection("appointments").UpdateOne(ctx, bson.M{"_id": objId}, bson.M{"$set": bson.M{"status": status}})
 
 	if err != nil {
-		return err
+		return errorCommon.NewInvariantError("Failed to update appointment status")
 	}
 
 	return nil
@@ -118,7 +120,7 @@ func (c *ChatRepositoryImplementaion) InsertChatroom(ctx context.Context, chatro
 	_, err = c.db.Collection("chatrooms").InsertOne(ctx, chatroom)
 
 	if err != nil {
-		return err
+		return errorCommon.NewInvariantError("Failed to insert chatroom")
 	}
 
 	return nil
@@ -128,13 +130,13 @@ func (c *ChatRepositoryImplementaion) FindChatroomByID(ctx context.Context, id s
 	objId, err := primitive.ObjectIDFromHex(id)
 
 	if err != nil {
-		return chatroom, err
+		return chatroom, errorCommon.NewInvariantError("Invalid chatroom id format")
 	}
 
 	err = c.db.Collection("chatrooms").FindOne(ctx, bson.M{"_id": objId}).Decode(&chatroom)
 
 	if err != nil {
-		return chatroom, err
+		return chatroom, errorCommon.NewInvariantError("Chatroom not found")
 	}
 
 	return chatroom, nil
@@ -144,13 +146,13 @@ func (c *ChatRepositoryImplementaion) FindChatroomByAppointmentID(ctx context.Co
 	objId, err := primitive.ObjectIDFromHex(id)
 
 	if err != nil {
-		return chatroom, err
+		return chatroom, errorCommon.NewInvariantError("Invalid appointment id format")
 	}
 
 	err = c.db.Collection("chatrooms").FindOne(ctx, bson.M{"appointment_id": objId}).Decode(&chatroom)
 
 	if err != nil {
-		return chatroom, err
+		return chatroom, errorCommon.NewInvariantError("Chatroom not found")
 	}
 
 	return chatroom, nil
@@ -160,13 +162,13 @@ func (c *ChatRepositoryImplementaion) DeleteChatroom(ctx context.Context, id str
 	objId, err := primitive.ObjectIDFromHex(id)
 
 	if err != nil {
-		return err
+		return errorCommon.NewInvariantError("Invalid chatroom id format")
 	}
 
 	_, err = c.db.Collection("chatrooms").DeleteOne(ctx, bson.M{"_id": objId})
 
 	if err != nil {
-		return err
+		return errorCommon.NewInvariantError("Failed to delete chatroom")
 	}
 
 	return nil
@@ -179,13 +181,13 @@ func (c *ChatRepositoryImplementaion) InsertMessageToChatrooms(ctx context.Conte
 	objId, err := primitive.ObjectIDFromHex(chatroomId)
 
 	if err != nil {
-		return err
+		return errorCommon.NewInvariantError("Invalid chatroom id format")
 	}
 
 	_, err = c.db.Collection("chatrooms").UpdateOne(ctx, bson.M{"_id": objId}, bson.M{"$push": bson.M{"messages": message}})
 
 	if err != nil {
-		return err
+		return errorCommon.NewInvariantError("Failed to insert message to chatroom")
 	}
 
 	return nil
@@ -195,7 +197,7 @@ func (c *ChatRepositoryImplementaion) FindAllMessagesByChatroomID(ctx context.Co
 	objId, err := primitive.ObjectIDFromHex(id)
 
 	if err != nil {
-		return messages, err
+		return messages, errorCommon.NewInvariantError("Invalid chatroom id format")
 	}
 
 	var chatroom chatDomain.Chatroom
@@ -203,7 +205,7 @@ func (c *ChatRepositoryImplementaion) FindAllMessagesByChatroomID(ctx context.Co
 	err = c.db.Collection("chatrooms").FindOne(ctx, bson.M{"_id": objId}).Decode(&chatroom)
 
 	if err != nil {
-		return messages, err
+		return messages, errorCommon.NewInvariantError("Chatroom not found")
 	}
 
 	messages = chatroom.Messages
@@ -215,7 +217,7 @@ func (c *ChatRepositoryImplementaion) FindMessageByID(ctx context.Context, id st
 	objId, err := primitive.ObjectIDFromHex(id)
 
 	if err != nil {
-		return message, err
+		return message, errorCommon.NewInvariantError("Invalid message id format")
 	}
 
 	var chatroom chatDomain.Chatroom
@@ -223,7 +225,7 @@ func (c *ChatRepositoryImplementaion) FindMessageByID(ctx context.Context, id st
 	err = c.db.Collection("chatrooms").FindOne(ctx, bson.D{{Key: "messages", Value: bson.D{{Key: "$elemMatch", Value: bson.D{{Key: "_id", Value: objId}}}}}}).Decode(&chatroom)
 
 	if err != nil {
-		return message, err
+		return message, errorCommon.NewInvariantError("Message not found")
 	}
 
 	for _, msg := range chatroom.Messages {
@@ -239,13 +241,13 @@ func (c *ChatRepositoryImplementaion) DeleteMessage(ctx context.Context, id stri
 	objId, err := primitive.ObjectIDFromHex(id)
 
 	if err != nil {
-		return err
+		return errorCommon.NewInvariantError("Invalid message id format")
 	}
 
 	_, err = c.db.Collection("chatrooms").UpdateOne(ctx, bson.D{{Key: "messages", Value: bson.D{{Key: "$elemMatch", Value: bson.D{{Key: "_id", Value: objId}}}}}}, bson.M{"$pull": bson.M{"messages": bson.M{"_id": objId}}})
 
 	if err != nil {
-		return err
+		return errorCommon.NewInvariantError("Failed to delete message")
 	}
 
 	return nil
