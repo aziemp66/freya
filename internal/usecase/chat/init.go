@@ -32,8 +32,10 @@ func (c *ChatUsecaseImplementation) InsertAppointment(ctx context.Context, pysch
 		return errorCommon.NewInvariantError("Invalid user id")
 	}
 
+	appointmentId := primitive.NewObjectID()
+
 	appointment := chatDomain.Appointment{
-		ID:             primitive.NewObjectID(),
+		ID:             appointmentId,
 		PsychologistID: psyObjID,
 		UserID:         userObjID,
 		Status:         httpCommon.APPOINTMENTPENDING,
@@ -43,6 +45,12 @@ func (c *ChatUsecaseImplementation) InsertAppointment(ctx context.Context, pysch
 	}
 
 	err = c.chatRepository.InsertAppointment(ctx, appointment)
+
+	if err != nil {
+		return err
+	}
+
+	err = c.InsertChatroom(ctx, appointmentId.Hex(), psyObjID.Hex(), userObjID.Hex())
 
 	if err != nil {
 		return err

@@ -6,6 +6,7 @@ import (
 	errorCommon "github.com/aziemp66/freya-be/common/error"
 	httpCommon "github.com/aziemp66/freya-be/common/http"
 	httpHandler "github.com/aziemp66/freya-be/common/http/handler"
+	htttpMiddleware "github.com/aziemp66/freya-be/common/http/middleware"
 	jwtCommon "github.com/aziemp66/freya-be/common/jwt"
 
 	chatUsecase "github.com/aziemp66/freya-be/internal/usecase/chat"
@@ -22,10 +23,12 @@ func NewChatDeliveryImplementation(router *gin.RouterGroup, chatUsecase chatUsec
 		jwtManager:  jwtManager,
 	}
 
-	router.POST("/appointment", chatDelivery.CreateAppointment)
+	router.Use(htttpMiddleware.JWTAuth(jwtManager))
+
+	router.POST("/appointment", htttpMiddleware.RoleAuth("base"), chatDelivery.CreateAppointment)
 	router.GET("/appointment/:id", chatDelivery.GetAppointmentByID)
 	router.GET("/appointment", chatDelivery.GetAllAppointmentByUserID)
-	router.PUT("/appointment/:id", chatDelivery.UpdateAppointmentStatus)
+	router.PUT("/appointment/:id", htttpMiddleware.RoleAuth("psychologist"), chatDelivery.UpdateAppointmentStatus)
 	router.GET("/chatroom/:id/ws", chatDelivery.MessageChatroom)
 	router.GET(("/chatroom/message/:id"), chatDelivery.GetChatRoomHistory)
 	router.GET("/chatroom/:id", chatDelivery.GetChatroomByID)
@@ -55,12 +58,6 @@ func (d *ChatDeliveryImplementation) CreateAppointment(c *gin.Context) {
 		Code:    200,
 		Message: "Create appointment success",
 	})
-}
-
-func (d *ChatDeliveryImplementation) MessageChatroom(c *gin.Context) {
-	chatroomId := c.Param("id")
-
-	httpHandler.ServeWebSocket(c, d.chatUsecase, d.jwtManager, chatroomId)
 }
 
 func (d *ChatDeliveryImplementation) GetAppointmentByID(c *gin.Context) {
@@ -125,6 +122,11 @@ func (d *ChatDeliveryImplementation) UpdateAppointmentStatus(c *gin.Context) {
 		return
 	}
 
+	if appointment.PsychologistId != c.GetString("user_id") {
+		c.Error(errorCommon.NewForbiddenError("You are not allowed to access this resource"))
+		return
+	}
+
 	err = d.chatUsecase.UpdateAppointmentStatus(c, appointmentId, appointmentRequest.Status)
 
 	if err != nil {
@@ -132,33 +134,40 @@ func (d *ChatDeliveryImplementation) UpdateAppointmentStatus(c *gin.Context) {
 		return
 	}
 
-	if appointmentRequest.Status == httpCommon.APPOINTMENTACCEPTED {
-		err = d.chatUsecase.InsertChatroom(c, appointmentId, appointment.PsychologistId, appointment.UserId)
-
-		if err != nil {
-			c.Error(err)
-			return
-		}
-	} else if appointmentRequest.Status == httpCommon.APPOINTMENTCANCELED || appointmentRequest.Status == httpCommon.APPOINTMENTCOMPLETED {
-		chatroom, err := d.chatUsecase.FindChatroomByAppointmentID(c, appointmentId)
-
-		if err != nil {
-			c.Error(err)
-			return
-		}
-
-		err = d.chatUsecase.DeleteChatroom(c, chatroom.Id)
-
-		if err != nil {
-			c.Error(err)
-			return
-		}
-	}
-
 	c.JSON(200, httpCommon.Response{
 		Code:    200,
 		Message: "Update appointment success",
 	})
+}
+
+func (d *ChatDeliveryImplementation) MessageChatroom(c *gin.Context) {
+	chatroomId := c.Param("id")
+
+	chatRoom, err := d.chatUsecase.FindChatroomByID(c, chatroomId)
+
+	if err != nil {
+		c.Error(err)
+		return
+	}
+
+	if chatRoom.UserId != c.GetString("user_id") && chatRoom.PsychologistId != c.GetString("user_id") {
+		c.Error(errorCommon.NewForbiddenError("You are not allowed to access this resource"))
+		return
+	}
+
+	appointment, err := d.chatUsecase.FindAppointmentByID(c, chatRoom.AppointmentId)
+
+	if err != nil {
+		c.Error(err)
+		return
+	}
+
+	if appointment.Status != "accepted" {
+		c.Error(errorCommon.NewForbiddenError("Chatroom is not available right now"))
+		return
+	}
+
+	httpHandler.ServeWebSocket(c, d.chatUsecase, d.jwtManager, chatroomId)
 }
 
 func (d *ChatDeliveryImplementation) GetChatroomByID(c *gin.Context) {
