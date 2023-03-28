@@ -253,26 +253,26 @@ func (c *ChatUsecaseImplementation) FindAllMessagesByChatroomID(ctx context.Cont
 	return
 }
 
-func (c *ChatUsecaseImplementation) FindMessageByID(ctx context.Context, id string) (message httpCommon.Message, err error) {
-	msg, err := c.chatRepository.FindMessageByID(ctx, id)
+// func (c *ChatUsecaseImplementation) FindMessageByID(ctx context.Context, id string) (message httpCommon.Message, err error) {
+// 	msg, err := c.chatRepository.FindMessageByID(ctx, id)
 
-	if err != nil {
-		return message, err
-	}
+// 	if err != nil {
+// 		return message, err
+// 	}
 
-	message = httpCommon.Message{
-		Id:        msg.ID.Hex(),
-		SenderId:  msg.SenderID.Hex(),
-		Content:   msg.Content,
-		CreatedAt: msg.CreatedAt,
-		UpdatedAt: msg.UpdatedAt,
-	}
+// 	message = httpCommon.Message{
+// 		Id:        msg.ID.Hex(),
+// 		SenderId:  msg.SenderID.Hex(),
+// 		Content:   msg.Content,
+// 		CreatedAt: msg.CreatedAt,
+// 		UpdatedAt: msg.UpdatedAt,
+// 	}
 
-	return
-}
+// 	return
+// }
 
-func (c *ChatUsecaseImplementation) DeleteMessage(ctx context.Context, id string) (err error) {
-	err = c.chatRepository.DeleteMessage(ctx, id)
+// func (c *ChatUsecaseImplementation) DeleteMessage(ctx context.Context, id string) (err error) {
+// 	err = c.chatRepository.DeleteMessage(ctx, id)
 
-	return
-}
+// 	return
+// }

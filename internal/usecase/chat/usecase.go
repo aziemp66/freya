@@ -19,6 +19,6 @@ type Usecase interface {
 	DeleteChatroom(ctx context.Context, id string) (err error)
 	InsertMessageToChatroom(ctx context.Context, senderId string, content string, chatRoomID string) (err error)
 	FindAllMessagesByChatroomID(ctx context.Context, id string) (messages []httpCommon.Message, err error)
-	FindMessageByID(ctx context.Context, id string) (message httpCommon.Message, err error)
-	DeleteMessage(ctx context.Context, id string) (err error)
+	// FindMessageByID(ctx context.Context, id string) (message httpCommon.Message, err error)
+	// DeleteMessage(ctx context.Context, id string) (err error)
 }
