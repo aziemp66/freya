@@ -37,6 +37,7 @@ func (p *PostDeliveryImplementation) CreatePost(c *gin.Context) {
 	var postRequest httpCommon.AddPost
 
 	if err := c.ShouldBindJSON(&postRequest); err != nil {
+		c.Error(err)
 		return
 	}
 
@@ -121,6 +122,7 @@ func (p *PostDeliveryImplementation) CreateComment(c *gin.Context) {
 	var commentRequest httpCommon.AddComment
 
 	if err := c.ShouldBindJSON(&commentRequest); err != nil {
+		c.Error(err)
 		return
 	}
 

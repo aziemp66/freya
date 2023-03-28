@@ -57,6 +57,7 @@ func (u *UserDelivery) Register(c *gin.Context) {
 	var registerRequest httpCommon.AddUser
 
 	if err := c.ShouldBindJSON(&registerRequest); err != nil {
+		c.Error(err)
 		return
 	}
 
@@ -77,6 +78,7 @@ func (u *UserDelivery) Update(c *gin.Context) {
 	var updateUserRequest httpCommon.UpdateUser
 
 	if err := c.ShouldBindJSON(&updateUserRequest); err != nil {
+		c.Error(err)
 		return
 	}
 
@@ -99,6 +101,7 @@ func (u *UserDelivery) UpdatePassword(c *gin.Context) {
 	var updatePasswordRequest httpCommon.UpdatePassword
 
 	if err := c.ShouldBindJSON(&updatePasswordRequest); err != nil {
+		c.Error(err)
 		return
 	}
 
@@ -128,6 +131,7 @@ func (u *UserDelivery) ForgotPassword(c *gin.Context) {
 	var forgotPasswordRequest httpCommon.ForgotPassword
 
 	if err := c.ShouldBindJSON(&forgotPasswordRequest); err != nil {
+		c.Error(err)
 		return
 	}
 
@@ -148,6 +152,7 @@ func (u *UserDelivery) ResetPassword(c *gin.Context) {
 	var resetPasswordRequest httpCommon.ResetPassword
 
 	if err := c.ShouldBindJSON(&resetPasswordRequest); err != nil {
+		c.Error(err)
 		return
 	}
 
