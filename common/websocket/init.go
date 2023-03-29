@@ -76,10 +76,16 @@ func (s Subscription) ReadPump() {
 			break
 		}
 
-		userId, _, _, _ := s.JwtManager.VerifyAuthToken(readPayload.Token)
+		claims, err := s.JwtManager.VerifyAuthToken(readPayload.Token)
+
+		if err != nil {
+			fmt.Printf("error: %v", err.Error())
+			s.Ctx.AbortWithError(500, errorCommon.NewInvariantError(err.Error()))
+			return
+		}
 
 		messagePayload := MessagePayload{
-			User:    userId,
+			User:    claims.ID,
 			Message: readPayload.Message,
 		}
 

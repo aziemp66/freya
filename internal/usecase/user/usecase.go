@@ -16,5 +16,5 @@ type Usecase interface {
 	GetById(ctx context.Context, id string) (user httpCommon.User, err error)
 	Update(ctx context.Context, id string, user httpCommon.UpdateUser) (err error)
 	SendMailActivation(ctx context.Context, email string) (err error)
-	Activate(ctx context.Context, id string) (err error)
+	Activate(ctx context.Context, token string) (err error)
 }

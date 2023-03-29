@@ -21,10 +21,11 @@ type UserUsecaseImplementation struct {
 	passwordManager *password.PasswordHashManager
 	jwtManager      *jwt.JWTManager
 	mailDialer      *gomail.Dialer
+	frontEndUrl     string
 }
 
-func NewUserUsecaseImplementation(userRepository UserRepository.Repository, passwordManager *password.PasswordHashManager, jwtManager *jwt.JWTManager, mailDialer *gomail.Dialer) *UserUsecaseImplementation {
-	return &UserUsecaseImplementation{userRepository, passwordManager, jwtManager, mailDialer}
+func NewUserUsecaseImplementation(userRepository UserRepository.Repository, passwordManager *password.PasswordHashManager, jwtManager *jwt.JWTManager, mailDialer *gomail.Dialer, frontEndUrl string) *UserUsecaseImplementation {
+	return &UserUsecaseImplementation{userRepository, passwordManager, jwtManager, mailDialer, frontEndUrl}
 }
 
 func (u *UserUsecaseImplementation) Register(ctx context.Context, email, password, firstName, lastName string, birthDay time.Time) (err error) {
@@ -96,7 +97,7 @@ func (u *UserUsecaseImplementation) ForgotPassword(ctx context.Context, email st
 		Token: token,
 	}
 
-	mailTemplate, err := mailCommon.RenderPasswordResetTemplate(mailPasswordReset)
+	mailTemplate, err := mailCommon.RenderPasswordResetTemplate(mailPasswordReset, u.frontEndUrl)
 
 	if err != nil {
 		return errorCommon.NewInternalServerError("Failed to render mail template")
@@ -214,12 +215,57 @@ func (u *UserUsecaseImplementation) Update(ctx context.Context, id string, user 
 
 // send mail activation
 func (u *UserUsecaseImplementation) SendMailActivation(ctx context.Context, email string) (err error) {
+	user, err := u.userRepository.FindByEmail(ctx, email)
+
 	if err != nil {
-		panic(err)
+		return err
 	}
+
+	token, err := u.jwtManager.GenerateAuthToken(user.ID.Hex(), fmt.Sprintf("%s %s", user.FirstName, user.LastName), string(user.Role), 24*time.Hour)
+
+	if err != nil {
+		return errorCommon.NewInternalServerError("Failed to generate token")
+	}
+
+	mailActivation := mailCommon.EmailVerification{
+		Token: token,
+	}
+
+	templates, err := mailCommon.RenderEmailVerificationTemplate(mailActivation, u.frontEndUrl)
+
+	if err != nil {
+		return errorCommon.NewInternalServerError("Failed to render mail template")
+	}
+
+	msg := mailCommon.NewMessage(u.mailDialer.Username, user.Email, "Freya - Email Activation", templates)
+
+	u.mailDialer.DialAndSend(msg)
+
 	return
 }
 
-func (u *UserUsecaseImplementation) Activate(ctx context.Context, id string) (err error) {
+func (u *UserUsecaseImplementation) Activate(ctx context.Context, token string) (err error) {
+	claims, err := u.jwtManager.VerifyAuthToken(token)
+
+	if err != nil {
+		return errorCommon.NewUnauthorizedError("Token is invalid")
+	}
+
+	user, err := u.userRepository.FindByID(ctx, claims.ID)
+
+	if err != nil {
+		return err
+	}
+
+	if user.IsEmailVerified {
+		return errorCommon.NewInvariantError("Email is already verified")
+	}
+
+	err = u.userRepository.UpdateVerifiedEmail(ctx, user.ID.Hex())
+
+	if err != nil {
+		return err
+	}
+
 	return
 }

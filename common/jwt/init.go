@@ -35,7 +35,7 @@ func (j JWTManager) GenerateAuthToken(id string, name string, role string, durat
 	return tokenString, nil
 }
 
-func (j JWTManager) VerifyAuthToken(tokenString string) (id, name, role string, err error) {
+func (j JWTManager) VerifyAuthToken(tokenString string) (claim *AuthClaims, err error) {
 	claims := &AuthClaims{}
 
 	tkn, err := jwt.ParseWithClaims(tokenString, claims, func(t *jwt.Token) (interface{}, error) {
@@ -51,7 +51,7 @@ func (j JWTManager) VerifyAuthToken(tokenString string) (id, name, role string, 
 		return
 	}
 
-	return claims.ID, claims.Name, claims.Role, nil
+	return claims, nil
 }
 
 func (j JWTManager) GenerateUserToken(id string, password string, duration time.Duration) (string, error) {
