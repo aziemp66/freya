@@ -9,6 +9,7 @@ import (
 	jwtCommon "github.com/aziemp66/freya-be/common/jwt"
 	mailCommon "github.com/aziemp66/freya-be/common/mail"
 	passwordCommon "github.com/aziemp66/freya-be/common/password"
+	WsCommon "github.com/aziemp66/freya-be/common/websocket"
 
 	chatDlv "github.com/aziemp66/freya-be/internal/delivery/chat"
 	postDlv "github.com/aziemp66/freya-be/internal/delivery/post"
@@ -26,6 +27,8 @@ import (
 )
 
 func main() {
+	go WsCommon.H.Run()
+
 	cfg := env.LoadConfig()
 	httpServer := httpCommon.NewHTTPServer(cfg.GinMode)
 
