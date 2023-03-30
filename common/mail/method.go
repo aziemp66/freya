@@ -25,7 +25,7 @@ func RenderEmailVerificationTemplate(data EmailVerification, frontEndUrl string)
 
 func RenderPasswordResetTemplate(data PasswordReset, frontEndUrl string) (string, error) {
 	var buf bytes.Buffer
-	err := parsedTemplates.ExecuteTemplate(&buf, "password_reset.html", map[string]string{
+	err := parsedTemplates.ExecuteTemplate(&buf, "reset_password.html", map[string]string{
 		"Link": fmt.Sprintf("%s?token=%s&email=%s", frontEndUrl, data.Token, data.Email),
 	})
 	if err != nil {

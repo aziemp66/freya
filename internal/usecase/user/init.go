@@ -100,7 +100,7 @@ func (u *UserUsecaseImplementation) ForgotPassword(ctx context.Context, email st
 	mailTemplate, err := mailCommon.RenderPasswordResetTemplate(mailPasswordReset, u.frontEndUrl)
 
 	if err != nil {
-		return errorCommon.NewInternalServerError("Failed to render mail template")
+		return errorCommon.NewInternalServerError(err.Error())
 	}
 
 	message := mailCommon.NewMessage(u.mailDialer.Username, userData.Email, "Reset Password", mailTemplate)
@@ -234,7 +234,7 @@ func (u *UserUsecaseImplementation) SendMailActivation(ctx context.Context, emai
 	templates, err := mailCommon.RenderEmailVerificationTemplate(mailActivation, u.frontEndUrl)
 
 	if err != nil {
-		return errorCommon.NewInternalServerError("Failed to render mail template")
+		return errorCommon.NewInternalServerError(err.Error())
 	}
 
 	msg := mailCommon.NewMessage(u.mailDialer.Username, user.Email, "Freya - Email Activation", templates)
