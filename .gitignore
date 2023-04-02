@@ -1,6 +1,7 @@
 #dev environment
 .vscode
 .idea
+.air.toml
 
 #environtment
 .env
