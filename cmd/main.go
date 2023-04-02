@@ -40,7 +40,7 @@ func main() {
 	root := httpServer.Router.Group("/api", httpCommon.MiddlewareErrorHandler())
 
 	httpServer.Router.Use(cors.New(cors.Config{
-		AllowMethods:     []string{"GET", "POST", "PUT", "PATCH", "OPTIONS"},
+		AllowMethods:     []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"},
 		AllowHeaders:     []string{"Origin", "Content-Length", "Content-Type", "Authorization"},
 		AllowCredentials: false,
 		AllowAllOrigins:  true,
