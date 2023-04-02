@@ -29,6 +29,8 @@ import (
 func main() {
 	go WsCommon.H.Run()
 
+	go WsCommon.H.Run()
+
 	cfg := env.LoadConfig()
 	httpServer := httpCommon.NewHTTPServer(cfg.GinMode)
 
@@ -61,6 +63,9 @@ func main() {
 
 	err := httpServer.Router.Run(fmt.Sprintf(":%d", cfg.Port))
 
+	if err != nil {
+		panic(err)
+	}
 	if err != nil {
 		panic(err)
 	}
