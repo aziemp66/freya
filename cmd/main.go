@@ -50,7 +50,7 @@ func main() {
 	}))
 
 	userRepository := userRepo.NewUserRepositoryImplementation(db)
-	userUseCase := userUc.NewUserUsecaseImplementation(userRepository, passwordManager, jwtManager, mailDialer, cfg.FEUrl)
+	userUseCase := userUc.NewUserUsecaseImplementation(userRepository, passwordManager, jwtManager, mailDialer)
 	userDlv.NewUserDelivery(root, userUseCase, jwtManager)
 
 	postRepository := postRepo.NewPostRepositoryImplementation(db)

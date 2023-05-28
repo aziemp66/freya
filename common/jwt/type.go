@@ -9,8 +9,3 @@ type AuthClaims struct {
 	Role  string `json:"role"`
 	jwt.RegisteredClaims
 }
-
-type UserClaims struct {
-	ID string `json:"id"`
-	jwt.RegisteredClaims
-}

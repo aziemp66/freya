@@ -21,11 +21,10 @@ type UserUsecaseImplementation struct {
 	passwordManager *password.PasswordHashManager
 	jwtManager      *jwt.JWTManager
 	mailDialer      *gomail.Dialer
-	frontEndUrl     string
 }
 
-func NewUserUsecaseImplementation(userRepository UserRepository.Repository, passwordManager *password.PasswordHashManager, jwtManager *jwt.JWTManager, mailDialer *gomail.Dialer, frontEndUrl string) *UserUsecaseImplementation {
-	return &UserUsecaseImplementation{userRepository, passwordManager, jwtManager, mailDialer, frontEndUrl}
+func NewUserUsecaseImplementation(userRepository UserRepository.Repository, passwordManager *password.PasswordHashManager, jwtManager *jwt.JWTManager, mailDialer *gomail.Dialer) *UserUsecaseImplementation {
+	return &UserUsecaseImplementation{userRepository, passwordManager, jwtManager, mailDialer}
 }
 
 func (u *UserUsecaseImplementation) Register(ctx context.Context, email, password, firstName, lastName string, birthDay time.Time) (err error) {
@@ -80,30 +79,25 @@ func (u *UserUsecaseImplementation) Login(ctx context.Context, email, password s
 }
 
 func (u *UserUsecaseImplementation) ForgotPassword(ctx context.Context, email string) (err error) {
-	userData, err := u.userRepository.FindByEmail(ctx, email)
+	user, err := u.userRepository.FindByEmail(ctx, email)
 
 	if err != nil {
 		return err
 	}
 
-	token, err := u.jwtManager.GenerateUserToken(userData.ID.Hex(), userData.Password, 24*time.Hour)
+	token, err := u.jwtManager.GenerateAuthToken(user.ID.Hex(), fmt.Sprintf("%s %s", user.FirstName, user.LastName), string(user.Role), 24*time.Hour)
 
 	if err != nil {
 		return errorCommon.NewInternalServerError("Failed to generate token")
 	}
 
-	mailPasswordReset := mailCommon.PasswordReset{
-		Email: userData.Email,
-		Token: token,
-	}
-
-	mailTemplate, err := mailCommon.RenderPasswordResetTemplate(mailPasswordReset, u.frontEndUrl)
+	mailTemplate, err := mailCommon.RenderPasswordResetTemplate(token)
 
 	if err != nil {
 		return errorCommon.NewInternalServerError(err.Error())
 	}
 
-	message := mailCommon.NewMessage(u.mailDialer.Username, userData.Email, "Reset Password", mailTemplate)
+	message := mailCommon.NewMessage(u.mailDialer.Username, user.Email, "Reset Password", mailTemplate)
 
 	err = u.mailDialer.DialAndSend(message)
 
@@ -114,26 +108,20 @@ func (u *UserUsecaseImplementation) ForgotPassword(ctx context.Context, email st
 	return nil
 }
 
-func (u *UserUsecaseImplementation) ResetPassword(ctx context.Context, id, token, newPassword string) (err error) {
+func (u *UserUsecaseImplementation) ResetPassword(ctx context.Context, token, newPassword string) (err error) {
 	newPassword, err = u.passwordManager.HashPassword(newPassword)
 
 	if err != nil {
 		return errorCommon.NewInternalServerError("Failed to hash password")
 	}
 
-	user, err := u.userRepository.FindByID(ctx, id)
-
-	if err != nil {
-		return err
-	}
-
-	err = u.jwtManager.VerifyUserToken(token, user.Password)
+	claims, err := u.jwtManager.VerifyAuthToken(token)
 
 	if err != nil {
 		return errorCommon.NewInvariantError("Token is invalid")
 	}
 
-	err = u.userRepository.UpdatePassword(ctx, id, newPassword)
+	err = u.userRepository.UpdatePassword(ctx, claims.ID, newPassword)
 
 	if err != nil {
 		return err
@@ -227,11 +215,7 @@ func (u *UserUsecaseImplementation) SendMailActivation(ctx context.Context, emai
 		return errorCommon.NewInternalServerError("Failed to generate token")
 	}
 
-	mailActivation := mailCommon.EmailVerification{
-		Token: token,
-	}
-
-	templates, err := mailCommon.RenderEmailVerificationTemplate(mailActivation, u.frontEndUrl)
+	templates, err := mailCommon.RenderEmailVerificationTemplate(token)
 
 	if err != nil {
 		return errorCommon.NewInternalServerError(err.Error())

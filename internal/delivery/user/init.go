@@ -165,10 +165,9 @@ func (u *UserDelivery) ResetPassword(c *gin.Context) {
 		return
 	}
 
-	userId := c.Query("id")
 	userToken := c.Query("token")
 
-	err := u.UserUseCase.ResetPassword(c, userToken, userId, resetPasswordRequest.NewPassword)
+	err := u.UserUseCase.ResetPassword(c, userToken, resetPasswordRequest.NewPassword)
 
 	if err != nil {
 		c.Error(err)

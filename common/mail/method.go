@@ -3,7 +3,6 @@ package mail
 import (
 	"bytes"
 	"embed"
-	"fmt"
 	"html/template"
 )
 
@@ -12,10 +11,10 @@ var templates embed.FS
 
 var parsedTemplates = template.Must(template.ParseFS(templates, "templates/*.html"))
 
-func RenderEmailVerificationTemplate(data EmailVerification, frontEndUrl string) (string, error) {
+func RenderEmailVerificationTemplate(token string) (string, error) {
 	var buf bytes.Buffer
 	err := parsedTemplates.ExecuteTemplate(&buf, "email_verification.html", map[string]string{
-		"Link": fmt.Sprintf("%s?token=%s", frontEndUrl, data.Token),
+		"Token": token,
 	})
 	if err != nil {
 		return "", err
@@ -23,10 +22,10 @@ func RenderEmailVerificationTemplate(data EmailVerification, frontEndUrl string)
 	return buf.String(), nil
 }
 
-func RenderPasswordResetTemplate(data PasswordReset, frontEndUrl string) (string, error) {
+func RenderPasswordResetTemplate(token string) (string, error) {
 	var buf bytes.Buffer
 	err := parsedTemplates.ExecuteTemplate(&buf, "reset_password.html", map[string]string{
-		"Link": fmt.Sprintf("%s?token=%s&email=%s", frontEndUrl, data.Token, data.Email),
+		"Token": token,
 	})
 	if err != nil {
 		return "", err
