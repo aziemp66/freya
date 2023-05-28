@@ -29,8 +29,6 @@ import (
 func main() {
 	go WsCommon.H.Run()
 
-	go WsCommon.H.Run()
-
 	cfg := env.LoadConfig()
 	httpServer := httpCommon.NewHTTPServer(cfg.GinMode)
 
@@ -51,15 +49,15 @@ func main() {
 
 	userRepository := userRepo.NewUserRepositoryImplementation(db)
 	userUseCase := userUc.NewUserUsecaseImplementation(userRepository, passwordManager, jwtManager, mailDialer)
-	userDlv.NewUserDelivery(root, userUseCase, jwtManager)
+	userDlv.NewUserDelivery(root.Group("/user"), userUseCase, jwtManager)
 
 	postRepository := postRepo.NewPostRepositoryImplementation(db)
 	postUseCase := postUc.NewPostUsecaseImplementation(postRepository)
-	postDlv.NewPostDelivery(root, postUseCase, jwtManager)
+	postDlv.NewPostDelivery(root.Group("/post"), postUseCase, jwtManager)
 
 	chatRepository := chatRepo.NewChatRepositoryImplementaion(db)
 	chatUseCase := chatUc.NewChatUsecaseImplementation(chatRepository)
-	chatDlv.NewChatDeliveryImplementation(root, chatUseCase, jwtManager)
+	chatDlv.NewChatDeliveryImplementation(root.Group("/chat"), chatUseCase, jwtManager)
 
 	err := httpServer.Router.Run(fmt.Sprintf(":%d", cfg.Port))
 
